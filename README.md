@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Flutter Billing App 🛒💨
 
 A fast, lightweight, and professional billing application built with Flutter. Designed for micro and small businesses to manage inventory, scan barcodes, and generate invoices with ease—all while being offline-first.
@@ -62,3 +63,6 @@ lib/
 ## 📜 License
 
 This project is open-source and available under the MIT License.
+=======
+# Retail-Billing-App
+>>>>>>> 7b0ccb9587c1d057d12e90f4214b37f7b73f4369

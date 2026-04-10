@@ -19,6 +19,7 @@ class _ScannerPageState extends State<ScannerPage>
     returnImage: false,
   );
   bool _isScanned = false;
+  bool _isFlashOn = false;
 
   late AnimationController _animationController;
   late Animation<double> _animation;
@@ -101,8 +102,13 @@ class _ScannerPageState extends State<ScannerPage>
             child: Column(
               children: [
                 _buildControlButton(
-                  icon: Icons.flashlight_on,
-                  onPressed: () => controller.toggleTorch(),
+                  icon: _isFlashOn ? Icons.flashlight_on : Icons.flashlight_off,
+                  onPressed: () {
+                    setState(() {
+                      _isFlashOn = !_isFlashOn;
+                    });
+                    controller.toggleTorch();
+                  },
                 ),
                 const SizedBox(height: 12),
                 _buildControlButton(
@@ -163,7 +169,7 @@ class _ScannerPageState extends State<ScannerPage>
                               color: Colors.greenAccent,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.greenAccent.withValues(alpha: 0.5),
+                                  color: Colors.greenAccent.withOpacity(0.5),
                                   blurRadius: 10,
                                   spreadRadius: 2,
                                 ),
@@ -207,7 +213,7 @@ class _ScannerPageState extends State<ScannerPage>
   Widget _buildControlButton({required IconData icon, required VoidCallback onPressed}) {
     return Container(
       decoration: BoxDecoration(
-        color: Colors.black.withValues(alpha: 0.5),
+        color: Colors.black.withOpacity(0.5),
         shape: BoxShape.circle,
         border: Border.all(color: Colors.white24),
       ),

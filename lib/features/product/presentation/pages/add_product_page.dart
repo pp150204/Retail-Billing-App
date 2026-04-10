@@ -23,6 +23,7 @@ class _AddProductPageState extends State<AddProductPage> {
   String _barcode = '';
   double _price = 0.0;
   int _stock = 0;
+  DateTime? _expiryDate;
 
   void _scanBarcode() async {
     final result = await context.push<String>('/scanner');
@@ -57,6 +58,7 @@ class _AddProductPageState extends State<AddProductPage> {
         barcode: _barcode,
         price: _price,
         stock: _stock,
+        expiryDate: _expiryDate,
       );
 
       context.read<ProductBloc>().add(AddProduct(product));
@@ -105,7 +107,7 @@ class _AddProductPageState extends State<AddProductPage> {
                       const SizedBox(width: 12),
                       Container(
                         decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                          color: AppTheme.primaryColor.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: IconButton(
@@ -175,6 +177,47 @@ class _AddProductPageState extends State<AddProductPage> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  const InputLabel(text: 'Expiry Date (Optional)'),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _expiryDate ?? DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          _expiryDate = picked;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400, width: 1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _expiryDate == null
+                                  ? 'Select Date'
+                                  : '${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year}',
+                              style: TextStyle(
+                                color: _expiryDate == null ? Colors.grey.shade600 : Colors.black,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.calendar_today, color: Colors.grey),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

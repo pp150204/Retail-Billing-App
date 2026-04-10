@@ -183,7 +183,7 @@ class _ProductListPageState extends State<ProductListPage> with SingleTickerProv
                 border: Border.all(color: const Color(0xFFF3F4F6)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.05),
+                    color: Colors.grey.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

@@ -1,6 +1,14 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+
+import '../../../shop/presentation/bloc/shop_bloc.dart';
+import '../bloc/billing_bloc.dart';
+
+import '../../../product/presentation/bloc/product_bloc.dart';
+import '../../../product/domain/entities/product.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -25,13 +33,23 @@ class HomePage extends StatelessWidget {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Mega Mart',
-                        style: TextStyle(
-                          fontSize: 24,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF1E3A8A),
-                        ),
+                      BlocBuilder<ShopBloc, ShopState>(
+                        builder: (context, state) {
+                          String shopName = 'Mega Mart';
+                          if (state is ShopLoaded) {
+                            shopName = state.shop.name.isNotEmpty 
+                                ? state.shop.name 
+                                : 'Mega Mart';
+                          }
+                          return Text(
+                            shopName,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color(0xFF1E3A8A),
+                            ),
+                          );
+                        },
                       ),
                       const SizedBox(height: 4),
                       Text(
@@ -44,17 +62,87 @@ class HomePage extends StatelessWidget {
                       ),
                     ],
                   ),
-                  Container(
-                    width: 48,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFEEF2FF),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.storefront_outlined,
-                      color: Color(0xFF4F46E5),
-                    ),
+                  Row(
+                    children: [
+                      BlocBuilder<ProductBloc, ProductState>(
+                        builder: (context, state) {
+                          if (state.status != ProductStatus.loaded) {
+                            return IconButton(
+                              icon: const Icon(Icons.notifications_none, color: Color(0xFF1E3A8A)),
+                              onPressed: () {},
+                            );
+                          }
+                          
+                          final now = DateTime.now();
+                          final today = DateTime(now.year, now.month, now.day);
+                          final expiringOrExpiredProducts = state.products.where((p) {
+                            if (p.expiryDate == null) return false;
+                            final expiryDate = DateTime(p.expiryDate!.year, p.expiryDate!.month, p.expiryDate!.day);
+                            final difference = expiryDate.difference(today).inDays;
+                            return difference <= 7;
+                          }).toList();
+                          
+                          return Stack(
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.notifications_none, color: Color(0xFF1E3A8A), size: 28),
+                                onPressed: () {
+                                  _showNotificationsDialog(context, expiringOrExpiredProducts);
+                                },
+                              ),
+                              if (expiringOrExpiredProducts.isNotEmpty)
+                                Positioned(
+                                  right: 8,
+                                  top: 8,
+                                  child: Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: const BoxDecoration(
+                                      color: Colors.red,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Text(
+                                      '${expiringOrExpiredProducts.length}',
+                                      style: const TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(width: 12),
+                      Container(
+                        width: 48,
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: const Color(0xFFEEF2FF),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: BlocBuilder<ShopBloc, ShopState>(
+                          builder: (context, state) {
+                            if (state is ShopLoaded && state.shop.logoPath.isNotEmpty) {
+                              return ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(state.shop.logoPath),
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.storefront_outlined, color: Color(0xFF4F46E5)),
+                                ),
+                              );
+                            }
+                            return const Icon(
+                              Icons.storefront_outlined,
+                              color: Color(0xFF4F46E5),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -80,7 +168,7 @@ class HomePage extends StatelessWidget {
                 children: [
                   _buildQuickActionCard(
                     context,
-                    title: 'New Billing',
+                    title: 'Start Billing',
                     icon: Icons.shopping_cart_outlined,
                     onTap: () {
                       context.go('/billing');
@@ -99,7 +187,7 @@ class HomePage extends StatelessWidget {
                     title: 'Reports',
                     icon: Icons.bar_chart_outlined,
                     onTap: () {
-                      // context.go('/reports'); // Navigate to reports
+                      context.go('/reports');
                     },
                   ),
                   _buildQuickActionCard(
@@ -127,112 +215,120 @@ class HomePage extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
-                    icon: const Icon(Icons.more_horiz, color: Colors.grey),
+                    onPressed: () {
+                      context.read<BillingBloc>().add(LoadTodaySummaryEvent());
+                    },
+                    icon: const Icon(Icons.refresh, color: Colors.grey),
                   ),
                 ],
               ),
               const SizedBox(height: 16),
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(24),
-                decoration: BoxDecoration(
-                  color: const Color(0xFF1E3A8A),
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF1E3A8A).withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'TOTAL REVENUE',
-                      style: TextStyle(
-                        color: Colors.white70,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 1.2,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    const Text(
-                      '\$1,240.00',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 36,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Total Orders',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.receipt_long, color: Colors.white, size: 16),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '42',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                'Items Sold',
-                                style: TextStyle(
-                                  color: Colors.white70,
-                                  fontSize: 12,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  const Icon(Icons.local_mall_outlined, color: Colors.white, size: 16),
-                                  const SizedBox(width: 8),
-                                  const Text(
-                                    '156',
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
+              BlocBuilder<BillingBloc, BillingState>(
+                builder: (context, state) {
+                  return Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF1E3A8A),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF1E3A8A).withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
                         ),
                       ],
                     ),
-                  ],
-                ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'TOTAL REVENUE',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 1.2,
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          '₹${state.todayRevenue.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 36,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Total Orders',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.receipt_long,
+                                          color: Colors.white, size: 16),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${state.todayOrdersCount}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Items Sold',
+                                    style: TextStyle(
+                                      color: Colors.white70,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 4),
+                                  Row(
+                                    children: [
+                                      const Icon(Icons.local_mall_outlined,
+                                          color: Colors.white, size: 16),
+                                      const SizedBox(width: 8),
+                                      Text(
+                                        '${state.todayItemsSold}',
+                                        style: const TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
               const SizedBox(height: 24),
 
@@ -306,7 +402,7 @@ class HomePage extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.grey.withValues(alpha: 0.05),
+              color: Colors.grey.withOpacity(0.05),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
@@ -340,6 +436,73 @@ class HomePage extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+
+  void _showNotificationsDialog(BuildContext context, List<Product> products) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        if (products.isEmpty) {
+          return AlertDialog(
+            title: const Text('Notifications'),
+            content: const Text('No recent notifications.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ],
+          );
+        }
+
+        final now = DateTime.now();
+        final today = DateTime(now.year, now.month, now.day);
+
+        return AlertDialog(
+          title: const Text('Expiry Alerts'),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: products.length,
+              itemBuilder: (context, index) {
+                final product = products[index];
+                final expiryDate = DateTime(product.expiryDate!.year, product.expiryDate!.month, product.expiryDate!.day);
+                final difference = expiryDate.difference(today).inDays;
+                
+                String status = '';
+                Color statusColor = Colors.grey;
+                
+                if (difference < 0) {
+                  status = 'Expired ${-difference} days ago';
+                  statusColor = Colors.red;
+                } else if (difference == 0) {
+                  status = 'Expires Today';
+                  statusColor = Colors.orange;
+                } else {
+                  status = 'Expires in $difference days';
+                  statusColor = Colors.orange.shade300;
+                }
+
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  leading: Icon(difference < 0 ? Icons.warning : Icons.inventory, color: statusColor),
+                  title: Text(product.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                  subtitle: Text(status, style: TextStyle(color: statusColor, fontWeight: FontWeight.w500)),
+                  trailing: Text('Stock: ${product.stock}'),
+                );
+              },
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

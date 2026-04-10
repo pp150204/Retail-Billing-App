@@ -1,3 +1,4 @@
+import 'package:billing_app/features/billing/presentation/pages/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -39,7 +40,9 @@ class _SettingsPageState extends State<SettingsPage> {
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.chevron_left, size: 28, color: Color(0xFF1F2937)),
-          onPressed: () => context.pop(),
+          onPressed: (){
+            Navigator.push(context, MaterialPageRoute(builder: (context) => HomePage(),));
+          },
         ),
         actions: [
           IconButton(
@@ -62,7 +65,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 border: Border.all(color: const Color(0xFFF3F4F6)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.05),
+                    color: Colors.grey.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -103,7 +106,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 border: Border.all(color: const Color(0xFFF3F4F6)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.05),
+                    color: Colors.grey.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -206,7 +209,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     border: Border.all(color: const Color(0xFFF3F4F6)),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.grey.withValues(alpha: 0.05),
+                        color: Colors.grey.withOpacity(0.05),
                         blurRadius: 10,
                         offset: const Offset(0, 4),
                       ),
@@ -327,7 +330,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 border: Border.all(color: const Color(0xFFF3F4F6)),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withValues(alpha: 0.05),
+                    color: Colors.grey.withOpacity(0.05),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

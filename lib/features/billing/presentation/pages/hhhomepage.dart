@@ -180,7 +180,9 @@ class originalHomePageState extends State<originalHomePage>
                       setState(() => _isFlashOn = !_isFlashOn);
                       _scannerController.toggleTorch();
                     },
-                    color: _isFlashOn ? Colors.green.withValues(alpha: 0.5) : null,
+                    color: _isFlashOn
+                        ? Colors.green.withOpacity(0.5)
+                        : null,
                   ),
                   _buildOverlayButton(
                     icon: Icons.flip_camera_ios,
@@ -222,7 +224,7 @@ class originalHomePageState extends State<originalHomePage>
                               color: Colors.greenAccent,
                               boxShadow: [
                                 BoxShadow(
-                                  color: Colors.greenAccent.withValues(alpha: 0.5),
+                                  color: Colors.greenAccent.withOpacity(0.5),
                                   blurRadius: 10,
                                   spreadRadius: 2,
                                 ),
@@ -361,7 +363,7 @@ class originalHomePageState extends State<originalHomePage>
             height: 4,
             margin: const EdgeInsets.symmetric(vertical: 12),
             decoration: BoxDecoration(
-              color: Colors.grey.withValues(alpha: 0.3),
+              color: Colors.grey.withOpacity(0.3),
               borderRadius: BorderRadius.circular(2),
             ),
           ),

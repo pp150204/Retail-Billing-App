@@ -7,6 +7,8 @@ import 'package:pretty_qr_code/pretty_qr_code.dart';
 import '../../../shop/presentation/bloc/shop_bloc.dart';
 import '../bloc/billing_bloc.dart';
 
+import '../widgets/digital_receipt_dialog.dart';
+
 class CheckoutPage extends StatefulWidget {
   const CheckoutPage({super.key});
 
@@ -15,6 +17,8 @@ class CheckoutPage extends StatefulWidget {
 }
 
 class _CheckoutPageState extends State<CheckoutPage> {
+  bool _isPaid = true;
+
   @override
   Widget build(BuildContext context) {
     const borderColor = Color(0xFFE5E5EA);
@@ -79,7 +83,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                     border: Border.all(color: borderColor),
                                     boxShadow: [
                                       BoxShadow(
-                                        color: Colors.black.withValues(alpha: 0.05),
+                                        color: Colors.black.withOpacity(0.05),
                                         blurRadius: 12,
                                         offset: const Offset(0, 4),
                                       )
@@ -146,13 +150,13 @@ class _CheckoutPageState extends State<CheckoutPage> {
                         // Bottom Bar
                         Container(
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.9),
+                            color: Colors.white.withOpacity(0.9),
                             borderRadius: const BorderRadius.horizontal(
                                 left: Radius.circular(24),
                                 right: Radius.circular(24)),
                             boxShadow: [
                               BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.05),
+                                color: Colors.black.withOpacity(0.05),
                                 blurRadius: 10,
                                 offset: const Offset(0, -4),
                               ),
@@ -225,13 +229,105 @@ class _CheckoutPageState extends State<CheckoutPage> {
                               PrimaryButton(
                                 onPressed: () {
                                   if (shopState is ShopLoaded) {
+                                    final items = billingState.cartItems
+                                        .map((item) => {
+                                              'name': item.product.name,
+                                              'qty': item.quantity,
+                                              'price': item.product.price,
+                                              'total': item.total,
+                                            })
+                                        .toList();
+
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => DigitalReceiptDialog(
+                                        shopName: shopState.shop.name,
+                                        address1: shopState.shop.addressLine1,
+                                        address2: shopState.shop.addressLine2,
+                                        phone: shopState.shop.phoneNumber,
+                                        total: billingState.totalAmount,
+                                        items: items,
+                                        footer: shopState.shop.footerText,
+                                        isPaid: _isPaid,
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(
+                                            content:
+                                            Text('Shop details not loaded'),
+                                            backgroundColor: Colors.red));
+                                  }
+                                },
+                                label: 'Preview & Complete',
+                                icon: Icons.visibility_outlined,
+                                backgroundColor: const Color(0xFF1E293B),
+                              ),
+                              const SizedBox(height: 8),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => setState(() => _isPaid = true),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          decoration: BoxDecoration(
+                                            color: _isPaid ? const Color(0xFF22C55E) : Colors.grey[100],
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: _isPaid ? const Color(0xFF22C55E) : Colors.grey[300]!),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'PAID',
+                                              style: TextStyle(
+                                                color: _isPaid ? Colors.white : Colors.grey[600],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 12),
+                                    Expanded(
+                                      child: GestureDetector(
+                                        onTap: () => setState(() => _isPaid = false),
+                                        child: Container(
+                                          padding: const EdgeInsets.symmetric(vertical: 12),
+                                          decoration: BoxDecoration(
+                                            color: !_isPaid ? const Color(0xFFEF4444) : Colors.grey[100],
+                                            borderRadius: BorderRadius.circular(12),
+                                            border: Border.all(color: !_isPaid ? const Color(0xFFEF4444) : Colors.grey[300]!),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'UNPAID',
+                                              style: TextStyle(
+                                                color: !_isPaid ? Colors.white : Colors.grey[600],
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              PrimaryButton(
+                                onPressed: () {
+                                  if (shopState is ShopLoaded) {
                                     context.read<BillingBloc>().add(
                                         PrintReceiptEvent(
                                             shopName: shopState.shop.name,
                                             address1: shopState.shop.addressLine1,
                                             address2: shopState.shop.addressLine2,
                                             phone: shopState.shop.phoneNumber,
-                                            footer: shopState.shop.footerText));
+                                            footer: shopState.shop.footerText,
+                                            isPaid: _isPaid));
                                   } else {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                         const SnackBar(

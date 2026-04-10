@@ -24,11 +24,11 @@ class ShopRepositoryImpl implements ShopRepository {
       } else {
         // Return default shop if not found
         return const Right(Shop(
-            name: 'Dinesh Shop',
-            addressLine1: 'Samrajpet, Mecheri',
-            addressLine2: 'Salem - 636453',
-            phoneNumber: '+917010674588',
-            upiId: 'dineshsowndar@oksbi',
+            name: 'Mega Mart',
+            addressLine1: 'Kolhapur, Maharashtra',
+            addressLine2: '-636453',
+            phoneNumber: '+919579690200',
+            upiId: 'prathmesh@oksbi',
             footerText: 'Thank you, Visit again!!!'));
       }
     } catch (e) {

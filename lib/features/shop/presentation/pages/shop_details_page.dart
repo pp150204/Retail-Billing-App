@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/shop.dart';
 import '../bloc/shop_bloc.dart';
@@ -18,6 +20,7 @@ class _ShopDetailsPageState extends State<ShopDetailsPage> {
   late TextEditingController _phoneController;
   late TextEditingController _taxIdController;
   late TextEditingController _footerController;
+  String _logoPath = '';
 
   @override
   void initState() {
@@ -38,6 +41,18 @@ class _ShopDetailsPageState extends State<ShopDetailsPage> {
       _phoneController.text = shop.phoneNumber;
       _taxIdController.text = shop.upiId;
       _footerController.text = shop.footerText;
+      _logoPath = shop.logoPath;
+    }
+  }
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    if (pickedFile != null) {
+      setState(() {
+        _logoPath = pickedFile.path;
+      });
     }
   }
 
@@ -60,6 +75,7 @@ class _ShopDetailsPageState extends State<ShopDetailsPage> {
         phoneNumber: _phoneController.text,
         upiId: _taxIdController.text,
         footerText: _footerController.text,
+        logoPath: _logoPath,
       );
 
       context.read<ShopBloc>().add(UpdateShopEvent(shop));
@@ -129,7 +145,7 @@ class _ShopDetailsPageState extends State<ShopDetailsPage> {
                       border: Border.all(color: const Color(0xFFF3F4F6)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.05),
+                          color: Colors.grey.withOpacity(0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         )
@@ -141,23 +157,34 @@ class _ShopDetailsPageState extends State<ShopDetailsPage> {
                           width: 80,
                           height: 80,
                           decoration: BoxDecoration(
-                            color: const Color(0xFF90A4AE), // Mock logo color
+                            color: const Color(0xFFF3F4F6),
                             borderRadius: BorderRadius.circular(20),
+                            image: _logoPath.isNotEmpty
+                                ? DecorationImage(
+                                    image: FileImage(File(_logoPath)),
+                                    fit: BoxFit.cover,
+                                  )
+                                : null,
                           ),
-                          child: const Center(
-                            child: Icon(Icons.storefront_outlined, color: Colors.white, size: 40),
-                          ),
+                          child: _logoPath.isEmpty
+                              ? const Center(
+                                  child: Icon(Icons.storefront_outlined,
+                                      color: Color(0xFF9CA3AF), size: 40))
+                              : null,
                         ),
                         const SizedBox(height: 16),
                         TextButton.icon(
-                          onPressed: () {},
+                          onPressed: _pickImage,
                           icon: const Icon(Icons.file_upload_outlined, size: 18),
-                          label: const Text('Change Logo', style: TextStyle(fontWeight: FontWeight.bold)),
+                          label: const Text('Change Logo',
+                              style: TextStyle(fontWeight: FontWeight.bold)),
                           style: TextButton.styleFrom(
                             foregroundColor: const Color(0xFF4F46E5),
-                            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 16, vertical: 8),
                             backgroundColor: const Color(0xFFEEF2FF),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8)),
                           ),
                         ),
                       ],
@@ -186,7 +213,7 @@ class _ShopDetailsPageState extends State<ShopDetailsPage> {
                       border: Border.all(color: const Color(0xFFF3F4F6)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.05),
+                          color: Colors.grey.withOpacity(0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         )
@@ -257,7 +284,7 @@ class _ShopDetailsPageState extends State<ShopDetailsPage> {
                       border: Border.all(color: const Color(0xFFF3F4F6)),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.grey.withValues(alpha: 0.05),
+                          color: Colors.grey.withOpacity(0.05),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         )

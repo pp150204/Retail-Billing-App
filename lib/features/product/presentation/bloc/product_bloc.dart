@@ -3,6 +3,8 @@ import 'package:equatable/equatable.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/usecases/product_usecases.dart';
 import '../../../../core/usecase/usecase.dart';
+import '../../../../core/service_locator.dart' as di;
+import '../../../../core/utils/notification_service.dart';
 
 part 'product_event.dart';
 part 'product_state.dart';
@@ -32,8 +34,10 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     result.fold(
       (failure) => emit(state.copyWith(
           status: ProductStatus.error, message: failure.message)),
-      (products) => emit(
-          state.copyWith(status: ProductStatus.loaded, products: products)),
+      (products) {
+        di.sl<NotificationService>().checkAndShowExpiryNotifications(products);
+        emit(state.copyWith(status: ProductStatus.loaded, products: products));
+      },
     );
   }
 

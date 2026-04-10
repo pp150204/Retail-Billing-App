@@ -17,6 +17,8 @@ class ShopModel extends Shop {
   final String upiId;
   @override
   final String footerText;
+  @override
+  final String logoPath;
 
   const ShopModel({
     required this.name,
@@ -25,6 +27,7 @@ class ShopModel extends Shop {
     required this.phoneNumber,
     required this.upiId,
     required this.footerText,
+    required this.logoPath,
   }) : super(
           name: name,
           addressLine1: addressLine1,
@@ -32,6 +35,7 @@ class ShopModel extends Shop {
           phoneNumber: phoneNumber,
           upiId: upiId,
           footerText: footerText,
+          logoPath: logoPath,
         );
 
   factory ShopModel.fromEntity(Shop shop) {
@@ -42,6 +46,7 @@ class ShopModel extends Shop {
       phoneNumber: shop.phoneNumber,
       upiId: shop.upiId,
       footerText: shop.footerText,
+      logoPath: shop.logoPath,
     );
   }
 
@@ -62,6 +67,7 @@ class ShopModel extends Shop {
       phoneNumber: map['phoneNumber'] as String,
       upiId: map['upiId'] as String,
       footerText: map['footerText'] as String,
+      logoPath: map['logoPath'] as String? ?? '',
     );
   }
 
@@ -74,6 +80,7 @@ class ShopModel extends Shop {
       'phoneNumber': phoneNumber,
       'upiId': upiId,
       'footerText': footerText,
+      'logoPath': logoPath,
     };
   }
 }

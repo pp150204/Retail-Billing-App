@@ -22,6 +22,7 @@ class _EditProductPageState extends State<EditProductPage> {
   late String _name;
   late double _price;
   late int _stock;
+  DateTime? _expiryDate;
 
   @override
   void initState() {
@@ -29,6 +30,7 @@ class _EditProductPageState extends State<EditProductPage> {
     _name = widget.product.name;
     _price = widget.product.price;
     _stock = widget.product.stock;
+    _expiryDate = widget.product.expiryDate;
   }
 
   void _submit() {
@@ -41,6 +43,7 @@ class _EditProductPageState extends State<EditProductPage> {
         barcode: widget.product.barcode,
         price: _price,
         stock: _stock,
+        expiryDate: _expiryDate,
       );
 
       context.read<ProductBloc>().add(UpdateProduct(updatedProduct));
@@ -75,10 +78,10 @@ class _EditProductPageState extends State<EditProductPage> {
                     padding: const EdgeInsets.all(16),
                     margin: const EdgeInsets.only(bottom: 24),
                     decoration: BoxDecoration(
-                      color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                      color: AppTheme.primaryColor.withOpacity(0.05),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.1)),
+                          color: AppTheme.primaryColor.withOpacity(0.1)),
                     ),
                     child: Row(
                       children: [
@@ -93,7 +96,7 @@ class _EditProductPageState extends State<EditProductPage> {
                                     fontSize: 12,
                                     fontWeight: FontWeight.bold,
                                     color: AppTheme.primaryColor
-                                        .withValues(alpha: 0.7))),
+                                        .withOpacity(0.7))),
                             const SizedBox(height: 2),
                             Text(widget.product.barcode,
                                 style: const TextStyle(
@@ -160,6 +163,47 @@ class _EditProductPageState extends State<EditProductPage> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 24),
+                  const InputLabel(text: 'Expiry Date (Optional)'),
+                  InkWell(
+                    onTap: () async {
+                      final picked = await showDatePicker(
+                        context: context,
+                        initialDate: _expiryDate ?? DateTime.now(),
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime(2100),
+                      );
+                      if (picked != null) {
+                        setState(() {
+                          _expiryDate = picked;
+                        });
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey.shade400, width: 1),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _expiryDate == null
+                                  ? 'Select Date'
+                                  : '${_expiryDate!.day}/${_expiryDate!.month}/${_expiryDate!.year}',
+                              style: TextStyle(
+                                color: _expiryDate == null ? Colors.grey.shade600 : Colors.black,
+                                fontSize: 16,
+                              ),
+                            ),
+                          ),
+                          const Icon(Icons.calendar_today, color: Colors.grey),
+                        ],
+                      ),
+                    ),
                   ),
                 ],
               ),

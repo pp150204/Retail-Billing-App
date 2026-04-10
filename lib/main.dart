@@ -9,11 +9,13 @@ import 'features/product/presentation/bloc/product_bloc.dart';
 import 'features/shop/presentation/bloc/shop_bloc.dart';
 import 'features/settings/presentation/bloc/printer_bloc.dart';
 import 'features/settings/presentation/bloc/printer_event.dart';
+import 'core/utils/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await SqliteDatabase.init();
   await di.init();
+  await di.sl<NotificationService>().init();
   runApp(const MyApp());
 }
 
@@ -29,8 +31,11 @@ class MyApp extends StatelessWidget {
         BlocProvider<ShopBloc>(
             create: (context) => di.sl<ShopBloc>()..add(LoadShopEvent())),
         BlocProvider<BillingBloc>(
-            create: (context) =>
-                BillingBloc(getProductByBarcodeUseCase: di.sl(), printerRepository: di.sl())),
+            create: (context) => BillingBloc(
+                  getProductByBarcodeUseCase: di.sl(),
+                  printerRepository: di.sl(),
+                  billRepository: di.sl(),
+                )),
         BlocProvider<PrinterBloc>(
             create: (context) => di.sl<PrinterBloc>()..add(InitPrinterEvent())),
       ],

@@ -10,10 +10,16 @@ import '../../features/shop/presentation/bloc/shop_bloc.dart';
 import '../../features/settings/data/repositories/printer_repository_impl.dart';
 import '../../features/settings/domain/repositories/printer_repository.dart';
 import '../../features/settings/presentation/bloc/printer_bloc.dart';
+import '../../features/billing/data/repositories/bill_repository_impl.dart';
+import '../../features/billing/domain/repositories/bill_repository.dart';
+import 'utils/notification_service.dart';
 
 final sl = GetIt.instance;
 
 Future<void> init() async {
+  // Core Services
+  sl.registerLazySingleton<NotificationService>(() => NotificationService());
+
   // Features - Product
   // Bloc
   sl.registerFactory(
@@ -63,5 +69,10 @@ Future<void> init() async {
   // Features - Settings / Printer
   sl.registerLazySingleton<PrinterRepository>(
     () => PrinterRepositoryImpl(),
+  );
+
+  // Features - Billing
+  sl.registerLazySingleton<BillRepository>(
+    () => BillRepositoryImpl(),
   );
 }

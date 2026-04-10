@@ -10,6 +10,7 @@ class PrimaryButton extends StatelessWidget {
   final bool isFullWidth;
   final TextStyle? textStyle;
   final bool isLoading;
+  final Color? backgroundColor;
 
   const PrimaryButton({
     super.key,
@@ -22,19 +23,20 @@ class PrimaryButton extends StatelessWidget {
     this.isFullWidth = true,
     this.textStyle,
     this.isLoading = false,
+    this.backgroundColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final style = ElevatedButton.styleFrom(
-      backgroundColor: Theme.of(context).primaryColor,
+      backgroundColor: backgroundColor ?? Theme.of(context).primaryColor,
       foregroundColor: Colors.white,
       padding: padding,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(borderRadius),
       ),
       elevation: elevation,
-      shadowColor: Theme.of(context).primaryColor.withValues(alpha: 0.4),
+      shadowColor: Theme.of(context).primaryColor.withOpacity(0.4),
       minimumSize: isFullWidth ? const Size.fromHeight(50) : null,
     );
 

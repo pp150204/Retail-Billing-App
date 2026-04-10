@@ -13,6 +13,7 @@ ShopModel _$ShopModelFromJson(Map<String, dynamic> json) => ShopModel(
       phoneNumber: json['phoneNumber'] as String,
       upiId: json['upiId'] as String,
       footerText: json['footerText'] as String,
+      logoPath: json['logoPath'] as String,
     );
 
 Map<String, dynamic> _$ShopModelToJson(ShopModel instance) => <String, dynamic>{
@@ -22,4 +23,5 @@ Map<String, dynamic> _$ShopModelToJson(ShopModel instance) => <String, dynamic>{
       'phoneNumber': instance.phoneNumber,
       'upiId': instance.upiId,
       'footerText': instance.footerText,
+      'logoPath': instance.logoPath,
     };

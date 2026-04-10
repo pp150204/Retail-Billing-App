@@ -15,6 +15,8 @@ class ProductModel extends Product {
   final double price;
   @override
   final int stock;
+  @override
+  final DateTime? expiryDate;
 
   const ProductModel({
     required this.id,
@@ -22,12 +24,14 @@ class ProductModel extends Product {
     required this.barcode,
     required this.price,
     required this.stock,
+    this.expiryDate,
   }) : super(
           id: id,
           name: name,
           barcode: barcode,
           price: price,
           stock: stock,
+          expiryDate: expiryDate,
         );
 
   factory ProductModel.fromEntity(Product product) {
@@ -37,6 +41,7 @@ class ProductModel extends Product {
       barcode: product.barcode,
       price: product.price,
       stock: product.stock,
+      expiryDate: product.expiryDate,
     );
   }
 
@@ -47,6 +52,7 @@ class ProductModel extends Product {
       barcode: barcode,
       price: price,
       stock: stock,
+      expiryDate: expiryDate,
     );
   }
 
@@ -64,6 +70,7 @@ class ProductModel extends Product {
       barcode: map['barcode'] as String,
       price: map['price'] as double,
       stock: map['stock'] as int,
+      expiryDate: map['expiryDate'] != null ? DateTime.parse(map['expiryDate'] as String) : null,
     );
   }
 
@@ -74,6 +81,7 @@ class ProductModel extends Product {
       'barcode': barcode,
       'price': price,
       'stock': stock,
+      'expiryDate': expiryDate?.toIso8601String(),
     };
   }
 }

@@ -12,6 +12,9 @@ ProductModel _$ProductModelFromJson(Map<String, dynamic> json) => ProductModel(
       barcode: json['barcode'] as String,
       price: (json['price'] as num).toDouble(),
       stock: (json['stock'] as num).toInt(),
+      expiryDate: json['expiryDate'] == null
+          ? null
+          : DateTime.parse(json['expiryDate'] as String),
     );
 
 Map<String, dynamic> _$ProductModelToJson(ProductModel instance) =>
@@ -21,4 +24,5 @@ Map<String, dynamic> _$ProductModelToJson(ProductModel instance) =>
       'barcode': instance.barcode,
       'price': instance.price,
       'stock': instance.stock,
+      'expiryDate': instance.expiryDate?.toIso8601String(),
     };

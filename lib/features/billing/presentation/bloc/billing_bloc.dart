@@ -1,6 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/cart_item.dart';
+import '../../domain/entities/bill.dart';
+import '../../domain/repositories/bill_repository.dart';
+import '../../data/models/bill_model.dart';
 import 'package:billing_app/features/product/domain/entities/product.dart';
 import 'package:billing_app/features/product/domain/usecases/product_usecases.dart';
 import '../../../../core/utils/printer_helper.dart';
@@ -12,15 +15,52 @@ part 'billing_state.dart';
 class BillingBloc extends Bloc<BillingEvent, BillingState> {
   final GetProductByBarcodeUseCase getProductByBarcodeUseCase;
   final PrinterRepository printerRepository;
+  final BillRepository billRepository;
 
-  BillingBloc({required this.getProductByBarcodeUseCase, required this.printerRepository})
-      : super(const BillingState()) {
+  BillingBloc({
+    required this.getProductByBarcodeUseCase,
+    required this.printerRepository,
+    required this.billRepository,
+  }) : super(const BillingState()) {
     on<ScanBarcodeEvent>(_onScanBarcode);
     on<AddProductToCartEvent>(_onAddProductToCart);
     on<RemoveProductFromCartEvent>(_onRemoveProductFromCart);
     on<UpdateQuantityEvent>(_onUpdateQuantity);
     on<ClearCartEvent>(_onClearCart);
     on<PrintReceiptEvent>(_onPrintReceipt);
+    on<LoadTodaySummaryEvent>(_onLoadTodaySummary);
+    on<CompleteTransactionEvent>(_onCompleteTransaction);
+
+    // Load initial summary
+    add(LoadTodaySummaryEvent());
+  }
+
+  Future<void> _onCompleteTransaction(
+      CompleteTransactionEvent event, Emitter<BillingState> emit) async {
+    if (state.cartItems.isEmpty) return;
+
+    try {
+      final bill = BillModel.fromCartItems(
+        List.from(state.cartItems),
+        state.totalAmount,
+      ).copyWith(isPaid: event.isPaid);
+      await billRepository.saveBill(bill);
+      add(LoadTodaySummaryEvent());
+      add(ClearCartEvent());
+      emit(state.copyWith(printSuccess: true));
+    } catch (e) {
+      emit(state.copyWith(error: 'Failed to complete transaction: $e'));
+    }
+  }
+
+  Future<void> _onLoadTodaySummary(
+      LoadTodaySummaryEvent event, Emitter<BillingState> emit) async {
+    final summary = await billRepository.getTodaySalesSummary();
+    emit(state.copyWith(
+      todayRevenue: (summary['totalRevenue'] as num).toDouble(),
+      todayOrdersCount: summary['totalOrders'] as int,
+      todayItemsSold: (summary['itemsSold'] as num).toInt(),
+    ));
   }
 
   Future<void> _onScanBarcode(
@@ -127,6 +167,14 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
           items: items,
           total: state.totalAmount,
           footer: event.footer);
+
+      // Save bill to database after successful printing
+      final bill = BillModel.fromCartItems(
+        List.from(state.cartItems),
+        state.totalAmount,
+      ).copyWith(isPaid: event.isPaid);
+      await billRepository.saveBill(bill);
+      add(LoadTodaySummaryEvent());
 
       emit(state.copyWith(isPrinting: false, printSuccess: true));
     } catch (e) {

@@ -1,11 +1,10 @@
-import 'package:billing_app/features/billing/presentation/pages/home_page.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import '../bloc/billing_bloc.dart';
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../domain/repositories/bill_repository.dart';
 import '../../domain/entities/bill.dart';
+import '../../../customer/domain/entities/customer.dart';
+import '../../../customer/domain/repositories/customer_repository.dart';
 import '../../../../core/service_locator.dart';
 
 class ReportsPage extends StatefulWidget {
@@ -16,13 +15,32 @@ class ReportsPage extends StatefulWidget {
 }
 
 class _ReportsPageState extends State<ReportsPage> {
-  late Future<List<Bill>> _billsFuture;
-  String _filter = 'All'; // 'All', 'Paid', 'Unpaid'
+  late Future<Map<String, dynamic>> _reportDataFuture;
+  String _filter = 'All';
 
   @override
   void initState() {
     super.initState();
-    _billsFuture = sl<BillRepository>().getAllBills();
+    _refreshData();
+  }
+
+  void _refreshData() {
+    setState(() {
+      _reportDataFuture = _fetchReportData();
+    });
+  }
+
+  Future<Map<String, dynamic>> _fetchReportData() async {
+    final results = await Future.wait([
+      sl<BillRepository>().getAllBills(),
+      sl<BillRepository>().getSalesAnalytics(),
+      sl<CustomerRepository>().getCustomers(),
+    ]);
+    return {
+      'bills': results[0],
+      'analytics': results[1],
+      'customers': results[2],
+    };
   }
 
   @override
@@ -40,8 +58,8 @@ class _ReportsPageState extends State<ReportsPage> {
           onPressed: () => context.go('/'),
         ),
       ),
-      body: FutureBuilder<List<Bill>>(
-        future: _billsFuture,
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: _reportDataFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
@@ -49,42 +67,73 @@ class _ReportsPageState extends State<ReportsPage> {
           if (snapshot.hasError) {
             return Center(child: Text('Error: ${snapshot.error}'));
           }
-          final allBills = snapshot.data ?? [];
-          final bills = allBills.where((bill) {
+
+          final data = snapshot.data!;
+          final allBills = data['bills'] as List<Bill>;
+          final analytics = data['analytics'] as Map<String, dynamic>;
+          final customers = data['customers'] as List<Customer>;
+
+          final filteredBills = allBills.where((bill) {
             if (_filter == 'All') return true;
             if (_filter == 'Paid') return bill.isPaid;
             if (_filter == 'Unpaid') return !bill.isPaid;
             return true;
           }).toList();
 
-          if (allBills.isEmpty) {
-            return const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey),
-                  SizedBox(height: 16),
-                  Text('No reports found.', style: TextStyle(color: Colors.grey)),
-                ],
-              ),
-            );
-          }
-
-          return Column(
-            children: [
-              _buildFilterBar(),
-              Expanded(
-                child: bills.isEmpty
-                    ? const Center(child: Text('No matching records found.'))
-                    : ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: bills.length,
-                  itemBuilder: (context, index) {
-                    final bill = bills[index];
-                    return _buildBillCard(bill);
-                  },
+          return CustomScrollView(
+            slivers: [
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _buildDashboard(analytics),
+                      const SizedBox(height: 24),
+                      _buildTopProducts(analytics['topProducts'] as List),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'TRANSACTIONS',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey,
+                          letterSpacing: 1.2,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
+              SliverAppBar(
+                pinned: true,
+                automaticallyImplyLeading: false,
+                backgroundColor: const Color(0xFFF8FAFC),
+                elevation: 0,
+                toolbarHeight: 60,
+                flexibleSpace: _buildFilterBar(),
+              ),
+              if (filteredBills.isEmpty)
+                const SliverFillRemaining(
+                  child: Center(child: Text('No matching records found.')),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  sliver: SliverList(
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) {
+                        final bill = filteredBills[index];
+                        final customer = bill.customerId != null 
+                          ? customers.cast<Customer?>().firstWhere((c) => c?.id == bill.customerId, orElse: () => null)
+                          : null;
+                        return _buildBillCard(bill, customer);
+                      },
+                      childCount: filteredBills.length,
+                    ),
+                  ),
+                ),
+              const SliverToBoxAdapter(child: SizedBox(height: 32)),
             ],
           );
         },
@@ -92,10 +141,145 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
+  Widget _buildDashboard(Map<String, dynamic> analytics) {
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Color(0xFF1E3A8A), Color(0xFF3B82F6)],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: const Color(0xFF1E3A8A).withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              )
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Total Revenue',
+                    style: TextStyle(color: Colors.white70, fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.account_balance_wallet_outlined, color: Colors.white, size: 20),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                '₹${(analytics['totalRevenue'] as num).toStringAsFixed(2)}',
+                style: const TextStyle(color: Colors.white, fontSize: 32, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(height: 20),
+              Row(
+                children: [
+                  _buildMiniStat('Orders', analytics['totalOrders'].toString(), Icons.shopping_bag_outlined),
+                  const SizedBox(width: 24),
+                  _buildMiniStat('Unpaid', '₹${(analytics['unpaidAmount'] as num).toStringAsFixed(2)}', Icons.pending_actions),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMiniStat(String label, String value, IconData icon) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white60, size: 16),
+        const SizedBox(width: 8),
+        Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(label, style: const TextStyle(color: Colors.white60, fontSize: 10)),
+            Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.bold)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTopProducts(List topProducts) {
+    if (topProducts.isEmpty) return const SizedBox.shrink();
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'TOP SELLING PRODUCTS',
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey, letterSpacing: 1.2),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          height: 100,
+          child: ListView.builder(
+            scrollDirection: Axis.horizontal,
+            itemCount: topProducts.length,
+            itemBuilder: (context, index) {
+              final product = topProducts[index];
+              return Container(
+                width: 160,
+                margin: const EdgeInsets.only(right: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(color: Colors.grey[200]!),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      product['productName'],
+                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '${product['totalQty']} units sold',
+                      style: TextStyle(color: Colors.grey[600], fontSize: 11),
+                    ),
+                    Text(
+                      '₹${(product['totalRevenue'] as num).toStringAsFixed(0)}',
+                      style: const TextStyle(color: Color(0xFF1E3A8A), fontWeight: FontWeight.bold, fontSize: 12),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildFilterBar() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-      color: Colors.white,
+      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      decoration: const BoxDecoration(
+        color: Color(0xFFF8FAFC),
+        border: Border(bottom: BorderSide(color: Color(0xFFE2E8F0))),
+      ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -140,7 +324,7 @@ class _ReportsPageState extends State<ReportsPage> {
     );
   }
 
-  Widget _buildBillCard(Bill bill) {
+  Widget _buildBillCard(Bill bill, Customer? customer) {
     final dateFormat = DateFormat('dd MMM yyyy, hh:mm a');
     
     return Container(
@@ -169,12 +353,12 @@ class _ReportsPageState extends State<ReportsPage> {
             child: const Icon(Icons.receipt, color: Color(0xFF1E3A8A)),
           ),
           title: Text(
-            bill.billNumber,
+            customer != null ? customer.name : bill.billNumber,
             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
           ),
           subtitle: Text(
-            dateFormat.format(bill.dateTime),
-            style: const TextStyle(color: Colors.grey, fontSize: 12),
+            customer != null ? '${bill.billNumber} • ${dateFormat.format(bill.dateTime)}' : dateFormat.format(bill.dateTime),
+            style: const TextStyle(color: Colors.grey, fontSize: 10),
           ),
           trailing: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -217,11 +401,10 @@ class _ReportsPageState extends State<ReportsPage> {
                   const Text(
                     'ITEMS',
                     style: TextStyle(
-                      fontSize: 10, 
-                      fontWeight: FontWeight.bold, 
-                      color: Colors.grey, 
-                      letterSpacing: 1
-                    ),
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.grey,
+                        letterSpacing: 1),
                   ),
                   const SizedBox(height: 8),
                   ...bill.items.map((item) => Padding(
@@ -242,6 +425,42 @@ class _ReportsPageState extends State<ReportsPage> {
                       ],
                     ),
                   )),
+                  const SizedBox(height: 16),
+                  const Divider(),
+                  const SizedBox(height: 8),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Current Status: ${bill.isPaid ? 'PAID' : 'UNPAID'}',
+                        style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: bill.isPaid ? Colors.green : Colors.red),
+                      ),
+                      TextButton.icon(
+                        onPressed: () async {
+                          await sl<BillRepository>().updateBillStatus(bill.id, !bill.isPaid);
+                          _refreshData();
+                          if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('Bill marked as ${!bill.isPaid ? 'Paid' : 'Unpaid'}'),
+                                backgroundColor: !bill.isPaid ? Colors.green : Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        icon: Icon(bill.isPaid ? Icons.close : Icons.check_circle_outline, 
+                          size: 18, 
+                          color: bill.isPaid ? Colors.red : Colors.green),
+                        label: Text(
+                          bill.isPaid ? 'Mark as Unpaid' : 'Mark as Paid',
+                          style: TextStyle(color: bill.isPaid ? Colors.red : Colors.green),
+                        ),
+                      ),
+                    ],
+                  ),
                 ],
               ),
             ),

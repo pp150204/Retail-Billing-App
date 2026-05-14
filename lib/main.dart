@@ -9,6 +9,7 @@ import 'features/product/presentation/bloc/product_bloc.dart';
 import 'features/shop/presentation/bloc/shop_bloc.dart';
 import 'features/settings/presentation/bloc/printer_bloc.dart';
 import 'features/settings/presentation/bloc/printer_event.dart';
+import 'features/customer/presentation/bloc/customer_bloc.dart';
 import 'core/utils/notification_service.dart';
 
 void main() async {
@@ -30,11 +31,14 @@ class MyApp extends StatelessWidget {
             create: (context) => di.sl<ProductBloc>()..add(LoadProducts())),
         BlocProvider<ShopBloc>(
             create: (context) => di.sl<ShopBloc>()..add(LoadShopEvent())),
+        BlocProvider<CustomerBloc>(
+            create: (context) => di.sl<CustomerBloc>()),
         BlocProvider<BillingBloc>(
             create: (context) => BillingBloc(
                   getProductByBarcodeUseCase: di.sl(),
                   printerRepository: di.sl(),
                   billRepository: di.sl(),
+                  updateCustomerUseCase: di.sl(),
                 )),
         BlocProvider<PrinterBloc>(
             create: (context) => di.sl<PrinterBloc>()..add(InitPrinterEvent())),

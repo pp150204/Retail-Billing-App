@@ -1,0 +1,72 @@
+Analyzing flutter_billing_app...                                
+
+   info - Don't invoke 'print' in production code - lib\core\data\sqlite_database.dart:27:5 - avoid_print
+   info - Parameter 'message' could be a super parameter - lib\core\error\failure.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\pages\main_shell_page.dart:41:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\pages\main_shell_page.dart:50:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:53:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:88:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\widgets\primary_button.dart:39:51 - deprecated_member_use
+warning - Unused import: 'package:billing_app/features/product/data/models/product_model.dart' - lib\features\billing\data\models\bill_model.dart:3:8 - unused_import
+warning - Unused import: 'package:sqflite/sqflite.dart' - lib\features\billing\data\repositories\bill_repository_impl.dart:1:8 - unused_import
+warning - Unused import: '../../domain/entities/bill.dart' - lib\features\billing\presentation\bloc\billing_bloc.dart:4:8 - unused_import
+warning - Unused import: '../../../customer/domain/entities/customer.dart' - lib\features\billing\presentation\pages\checkout_page.dart:9:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\checkout_page.dart:261:63 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\checkout_page.dart:328:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\checkout_page.dart:334:53 - deprecated_member_use
+   info - The type name 'originalHomePage' isn't an UpperCamelCase identifier - lib\features\billing\presentation\pages\hhhomepage.dart:13:7 - camel_case_types
+   info - The type name 'originalHomePageState' isn't an UpperCamelCase identifier - lib\features\billing\presentation\pages\hhhomepage.dart:20:7 - camel_case_types
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\hhhomepage.dart:184:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\hhhomepage.dart:227:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\hhhomepage.dart:366:34 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\home_page.dart:236:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\home_page.dart:405:34 - deprecated_member_use
+warning - Unused import: 'package:billing_app/features/billing/presentation/pages/home_page.dart' - lib\features\billing\presentation\pages\reports_page.dart:1:8 - unused_import
+warning - Unused import: 'package:flutter_bloc/flutter_bloc.dart' - lib\features\billing\presentation\pages\reports_page.dart:3:8 - unused_import
+warning - Unused import: '../bloc/billing_bloc.dart' - lib\features\billing\presentation\pages\reports_page.dart:6:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:162:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:181:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:311:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:340:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\scanner_page.dart:172:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\scanner_page.dart:216:29 - deprecated_member_use
+   info - Unnecessary 'const' keyword - lib\features\billing\presentation\widgets\digital_receipt_dialog.dart:68:58 - unnecessary_const
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\customer\presentation\pages\customer_list_page.dart:134:33 - deprecated_member_use
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:9:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:11:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:13:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:15:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:17:13 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:19:19 - overridden_fields
+   info - Use 'const' with the constructor to improve performance - lib\features\product\data\repositories\product_repository_impl.dart:35:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\product\data\repositories\product_repository_impl.dart:35:21 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\add_product_page.dart:110:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\edit_product_page.dart:81:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\edit_product_page.dart:84:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\edit_product_page.dart:99:42 - deprecated_member_use
+warning - Unused import: '../../../../core/theme/app_theme.dart' - lib\features\product\presentation\pages\product_list_page.dart:5:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\features\product\presentation\pages\product_list_page.dart:150:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\product\presentation\pages\product_list_page.dart:150:34 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\product_list_page.dart:184:40 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\settings\presentation\pages\settings_page.dart:44:77 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:68:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:109:40 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\settings\presentation\pages\settings_page.dart:178:30 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\settings\presentation\pages\settings_page.dart:179:35 - prefer_const_literals_to_create_immutables
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:212:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:333:40 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\settings\presentation\pages\settings_page.dart:351:21 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\settings\presentation\pages\settings_page.dart:365:21 - deprecated_member_use
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:9:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:11:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:13:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:15:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:17:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:19:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:21:16 - overridden_fields
+   info - Unnecessary 'this.' qualifier - lib\features\shop\domain\entities\shop.dart:37:29 - unnecessary_this
+warning - The left operand can't be null, so the right operand is never executed - lib\features\shop\domain\entities\shop.dart:37:29 - dead_null_aware_expression
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shop\presentation\pages\shop_details_page.dart:148:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shop\presentation\pages\shop_details_page.dart:216:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shop\presentation\pages\shop_details_page.dart:287:46 - deprecated_member_use
+

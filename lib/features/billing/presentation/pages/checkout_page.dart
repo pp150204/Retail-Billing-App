@@ -1,10 +1,12 @@
-import 'package:billing_app/core/widgets/primary_button.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
 
+import '../../../../core/widgets/primary_button.dart';
 import '../../../shop/presentation/bloc/shop_bloc.dart';
+import '../../../customer/presentation/bloc/customer_bloc.dart';
+import '../../../customer/domain/entities/customer.dart';
 import '../bloc/billing_bloc.dart';
 
 import '../widgets/digital_receipt_dialog.dart';
@@ -18,6 +20,108 @@ class CheckoutPage extends StatefulWidget {
 
 class _CheckoutPageState extends State<CheckoutPage> {
   bool _isPaid = true;
+
+  void _showCustomerSelector(BuildContext context) {
+    context.read<CustomerBloc>().add(LoadCustomersEvent());
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        ),
+        child: Column(
+          children: [
+            const SizedBox(height: 12),
+            Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: Colors.grey[300],
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(24),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Select Customer',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  ),
+                  TextButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      context.push('/customers/add');
+                    },
+                    icon: const Icon(Icons.add),
+                    label: const Text('New'),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: TextField(
+                onChanged: (value) {
+                  context.read<CustomerBloc>().add(SearchCustomersEvent(value));
+                },
+                decoration: InputDecoration(
+                  hintText: 'Search by name or phone...',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                    borderSide: BorderSide.none,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Expanded(
+              child: BlocBuilder<CustomerBloc, CustomerState>(
+                builder: (context, state) {
+                  if (state.status == CustomerStatus.loading) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+                  if (state.filteredCustomers.isEmpty) {
+                    return const Center(child: Text('No customers found'));
+                  }
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: state.filteredCustomers.length,
+                    itemBuilder: (context, index) {
+                      final customer = state.filteredCustomers[index];
+                      return ListTile(
+                        leading: CircleAvatar(
+                          backgroundColor: const Color(0xFFEEF2FF),
+                          child: Text(
+                            customer.name[0].toUpperCase(),
+                            style: const TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                        subtitle: Text(customer.phone),
+                        onTap: () {
+                          context.read<BillingBloc>().add(SelectCustomerEvent(customer));
+                          Navigator.pop(context);
+                        },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -75,77 +179,148 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                 horizontal: 16, vertical: 16),
                             child: Column(
                               children: [
-                                // Table
-                                Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(color: borderColor),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.black.withOpacity(0.05),
-                                        blurRadius: 12,
-                                        offset: const Offset(0, 4),
-                                      )
-                                    ],
-                                  ),
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(12),
-                                    child: Table(
-                                      border: const TableBorder(
-                                        horizontalInside:
-                                        BorderSide(color: borderColor),
-                                        bottom: BorderSide(color: borderColor),
-                                      ),
+                                  // Customer Selection
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: borderColor),
+                                    ),
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
                                       children: [
-                                        // Header row
-                                        TableRow(
-                                          decoration: const BoxDecoration(
-                                            color: Color(0xFFF8FAFC),
-                                            border: Border(
-                                                bottom:
-                                                BorderSide(color: borderColor)),
-                                          ),
+                                        Row(
+                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                           children: [
-                                            _buildHeaderCell(
-                                                'Product Name', TextAlign.left),
-                                            _buildHeaderCell(
-                                                'Price', TextAlign.right),
-                                            _buildHeaderCell(
-                                                'Total', TextAlign.right),
+                                            const Text(
+                                              'CUSTOMER',
+                                              style: TextStyle(
+                                                fontSize: 12,
+                                                fontWeight: FontWeight.bold,
+                                                color: Colors.grey,
+                                                letterSpacing: 1.2,
+                                              ),
+                                            ),
+                                            if (billingState.selectedCustomer != null)
+                                              TextButton(
+                                                onPressed: () => context.read<BillingBloc>().add(DeselectCustomerEvent()),
+                                                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
+                                                child: const Text('Remove', style: TextStyle(color: Colors.red, fontSize: 12)),
+                                              ),
                                           ],
                                         ),
-                                        // Items rows
-                                        ...billingState.cartItems.map((item) {
-                                          return TableRow(
-                                            children: [
-                                              _buildDataCell(
-                                                '${item.quantity} x ${item.product.name}',
-                                                TextAlign.left,
+                                        const SizedBox(height: 8),
+                                        if (billingState.selectedCustomer == null)
+                                          InkWell(
+                                            onTap: () {
+                                              _showCustomerSelector(context);
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                                              decoration: BoxDecoration(
+                                                color: const Color(0xFFF8FAFC),
+                                                borderRadius: BorderRadius.circular(8),
+                                                border: Border.all(color: borderColor),
                                               ),
-                                              _buildDataCell(
-                                                  '₹${item.product.price.toStringAsFixed(2)}',
-                                                  TextAlign.right,
-                                                  isSubtitle: true),
-                                              _buildDataCell(
-                                                  '₹${item.total.toStringAsFixed(2)}',
-                                                  TextAlign.right,
-                                                  isBold: true),
-                                            ],
-                                          );
-                                        }),
+                                              child: const Row(
+                                                children: [
+                                                  Icon(Icons.person_add_outlined, size: 20, color: Color(0xFF1E3A8A)),
+                                                  SizedBox(width: 12),
+                                                  Text('Select or Add Customer', style: TextStyle(color: Colors.grey)),
+                                                ],
+                                              ),
+                                            ),
+                                          )
+                                        else
+                                          ListTile(
+                                            contentPadding: EdgeInsets.zero,
+                                            leading: CircleAvatar(
+                                              backgroundColor: const Color(0xFFEEF2FF),
+                                              child: Text(
+                                                billingState.selectedCustomer!.name[0].toUpperCase(),
+                                                style: const TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.bold),
+                                              ),
+                                            ),
+                                            title: Text(billingState.selectedCustomer!.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                            subtitle: Text('${billingState.selectedCustomer!.phone} • ${billingState.selectedCustomer!.points} Points'),
+                                          ),
                                       ],
                                     ),
                                   ),
-                                ),
-                                const SizedBox(height: 24),
+                                  const SizedBox(height: 16),
 
-                                const SizedBox(
-                                    height: 120), // padding for bottom fixed bar
-                              ],
+                                  // Table
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(color: borderColor),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 12,
+                                          offset: const Offset(0, 4),
+                                        )
+                                      ],
+                                    ),
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(12),
+                                      child: Table(
+                                        border: const TableBorder(
+                                          horizontalInside:
+                                          BorderSide(color: borderColor),
+                                          bottom: BorderSide(color: borderColor),
+                                        ),
+                                        children: [
+                                          // Header row
+                                          TableRow(
+                                            decoration: const BoxDecoration(
+                                              color: Color(0xFFF8FAFC),
+                                              border: Border(
+                                                  bottom:
+                                                  BorderSide(color: borderColor)),
+                                            ),
+                                            children: [
+                                              _buildHeaderCell(
+                                                  'Product Name', TextAlign.left),
+                                              _buildHeaderCell(
+                                                  'Price', TextAlign.right),
+                                              _buildHeaderCell(
+                                                  'Total', TextAlign.right),
+                                            ],
+                                          ),
+                                          // Items rows
+                                          ...billingState.cartItems.map((item) {
+                                            return TableRow(
+                                              children: [
+                                                _buildDataCell(
+                                                  '${item.quantity} x ${item.product.name}',
+                                                  TextAlign.left,
+                                                ),
+                                                _buildDataCell(
+                                                    '₹${item.product.price.toStringAsFixed(2)}',
+                                                    TextAlign.right,
+                                                    isSubtitle: true),
+                                                _buildDataCell(
+                                                    '₹${item.total.toStringAsFixed(2)}',
+                                                    TextAlign.right,
+                                                    isBold: true),
+                                              ],
+                                            );
+                                          }),
+                                        ],
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 24),
+
+                                  const SizedBox(
+                                      height: 120), // padding for bottom fixed bar
+                                ],
+                              ),
                             ),
                           ),
-                        ),
 
                         // Bottom Bar
                         Container(
@@ -235,6 +410,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
                                               'qty': item.quantity,
                                               'price': item.product.price,
                                               'total': item.total,
+                                              'expiryDate': item.product.expiryDate,
                                             })
                                         .toList();
 

@@ -1,0 +1,166 @@
+Analyzing flutter_billing_app...                                
+
+  error - The name 'Product' isn't a type, so it can't be used in an 'as' expression - lib\config\routes\app_routes.dart:97:40 - cast_to_non_type
+   info - Don't invoke 'print' in production code - lib\core\data\sqlite_database.dart:27:5 - avoid_print
+   info - Parameter 'message' could be a super parameter - lib\core\error\failure.dart:12:9 - use_super_parameters
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\pages\main_shell_page.dart:41:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\presentation\pages\main_shell_page.dart:50:64 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:53:35 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\theme\app_theme.dart:88:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\core\widgets\primary_button.dart:39:51 - deprecated_member_use
+warning - Unused import: 'package:billing_app/features/product/data/models/product_model.dart' - lib\features\billing\data\models\bill_model.dart:3:8 - unused_import
+warning - Unused import: 'package:sqflite/sqflite.dart' - lib\features\billing\data\repositories\bill_repository_impl.dart:1:8 - unused_import
+  error - The included part 'package:billing_app/features/billing/presentation/bloc/billing_event.dart' must have a part-of directive - lib\features\billing\presentation\bloc\billing_bloc.dart:14:6 - part_of_non_part
+  error - The included part 'package:billing_app/features/billing/presentation/bloc/billing_state.dart' must have a part-of directive - lib\features\billing\presentation\bloc\billing_bloc.dart:15:6 - part_of_non_part
+  error - The name 'BillingEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:17:32 - non_type_as_type_argument
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:17:46 - non_type_as_type_argument
+  error - The name 'BillingState' isn't a class - lib\features\billing\presentation\bloc\billing_bloc.dart:28:20 - creation_with_non_type
+  error - The name 'ScanBarcodeEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:29:8 - non_type_as_type_argument
+  error - The name 'AddProductToCartEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:30:8 - non_type_as_type_argument
+  error - The name 'RemoveProductFromCartEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:31:8 - non_type_as_type_argument
+  error - The name 'UpdateQuantityEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:32:8 - non_type_as_type_argument
+  error - The name 'ClearCartEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:33:8 - non_type_as_type_argument
+  error - The name 'PrintReceiptEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:34:8 - non_type_as_type_argument
+  error - The name 'LoadTodaySummaryEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:35:8 - non_type_as_type_argument
+  error - The name 'CompleteTransactionEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:36:8 - non_type_as_type_argument
+  error - The name 'SelectCustomerEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:37:8 - non_type_as_type_argument
+  error - The name 'DeselectCustomerEvent' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:38:8 - non_type_as_type_argument
+  error - The method 'LoadTodaySummaryEvent' isn't defined for the type 'BillingBloc' - lib\features\billing\presentation\bloc\billing_bloc.dart:41:9 - undefined_method
+  error - Undefined class 'SelectCustomerEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:44:26 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:44:61 - non_type_as_type_argument
+  error - Undefined class 'DeselectCustomerEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:48:28 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:48:65 - non_type_as_type_argument
+  error - Undefined class 'CompleteTransactionEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:53:7 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:53:47 - non_type_as_type_argument
+  error - The method 'LoadTodaySummaryEvent' isn't defined for the type 'BillingBloc' - lib\features\billing\presentation\bloc\billing_bloc.dart:76:11 - undefined_method
+  error - The method 'ClearCartEvent' isn't defined for the type 'BillingBloc' - lib\features\billing\presentation\bloc\billing_bloc.dart:77:11 - undefined_method
+  error - Undefined class 'LoadTodaySummaryEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:85:7 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:85:44 - non_type_as_type_argument
+  error - Undefined class 'ScanBarcodeEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:95:7 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:95:39 - non_type_as_type_argument
+  error - The method 'AddProductToCartEvent' isn't defined for the type 'BillingBloc' - lib\features\billing\presentation\bloc\billing_bloc.dart:101:13 - undefined_method
+  error - Undefined class 'AddProductToCartEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:107:7 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:107:44 - non_type_as_type_argument
+  error - Undefined class 'RemoveProductFromCartEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:127:7 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:127:49 - non_type_as_type_argument
+  error - Undefined class 'UpdateQuantityEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:135:7 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:135:42 - non_type_as_type_argument
+  error - The method 'RemoveProductFromCartEvent' isn't defined for the type 'BillingBloc' - lib\features\billing\presentation\bloc\billing_bloc.dart:137:11 - undefined_method
+  error - Undefined class 'ClearCartEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:150:21 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:150:51 - non_type_as_type_argument
+  error - The name 'BillingState' isn't a class - lib\features\billing\presentation\bloc\billing_bloc.dart:151:16 - creation_with_non_type
+  error - Undefined class 'PrintReceiptEvent' - lib\features\billing\presentation\bloc\billing_bloc.dart:155:7 - undefined_class
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_bloc.dart:155:40 - non_type_as_type_argument
+  error - The method 'LoadTodaySummaryEvent' isn't defined for the type 'BillingBloc' - lib\features\billing\presentation\bloc\billing_bloc.dart:220:11 - undefined_method
+  error - Classes can only extend other classes - lib\features\billing\presentation\bloc\billing_event.dart:3:37 - extends_non_class
+warning - The getter doesn't override an inherited getter - lib\features\billing\presentation\bloc\billing_event.dart:6:20 - override_on_non_overriding_member
+  error - Undefined class 'Product' - lib\features\billing\presentation\bloc\billing_event.dart:26:9 - undefined_class
+  error - Classes can only extend other classes - lib\features\billing\presentation\bloc\billing_state.dart:3:28 - extends_non_class
+  error - The name 'CartItem' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_state.dart:4:14 - non_type_as_type_argument
+  error - The property 'total' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\bloc\billing_state.dart:24:73 - unchecked_use_of_nullable_value
+  error - The name 'CartItem' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\bloc\billing_state.dart:27:10 - non_type_as_type_argument
+warning - The getter doesn't override an inherited getter - lib\features\billing\presentation\bloc\billing_state.dart:51:21 - override_on_non_overriding_member
+warning - Unused import: '../../../customer/domain/entities/customer.dart' - lib\features\billing\presentation\pages\checkout_page.dart:9:8 - unused_import
+  error - The method 'SelectCustomerEvent' isn't defined for the type '_CheckoutPageState' - lib\features\billing\presentation\pages\checkout_page.dart:111:59 - undefined_method
+  error - The method 'ClearCartEvent' isn't defined for the type '_CheckoutPageState' - lib\features\billing\presentation\pages\checkout_page.dart:134:43 - undefined_method
+  error - The method 'ClearCartEvent' isn't defined for the type '_CheckoutPageState' - lib\features\billing\presentation\pages\checkout_page.dart:148:49 - undefined_method
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\pages\checkout_page.dart:153:43 - non_type_as_type_argument
+  error - The property 'printSuccess' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:155:25 - unchecked_use_of_nullable_value
+  error - The property 'selectedCustomer' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:205:62 - unchecked_use_of_nullable_value
+  error - The method 'DeselectCustomerEvent' isn't defined for the type '_CheckoutPageState' - lib\features\billing\presentation\pages\checkout_page.dart:207:98 - undefined_method
+  error - The property 'selectedCustomer' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:214:58 - unchecked_use_of_nullable_value
+  error - The property 'selectedCustomer' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:241:62 - unchecked_use_of_nullable_value
+  error - The property 'selectedCustomer' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:245:70 - unchecked_use_of_nullable_value
+  error - The property 'selectedCustomer' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:246:76 - unchecked_use_of_nullable_value
+  error - The property 'selectedCustomer' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:246:118 - unchecked_use_of_nullable_value
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\checkout_page.dart:261:63 - deprecated_member_use
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:294:59 - unchecked_use_of_nullable_value
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\checkout_page.dart:328:49 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\checkout_page.dart:334:53 - deprecated_member_use
+  error - The property 'totalAmount' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:370:97 - unchecked_use_of_nullable_value
+  error - The property 'totalAmount' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:391:60 - unchecked_use_of_nullable_value
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:407:64 - unchecked_use_of_nullable_value
+  error - The property 'totalAmount' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:424:61 - unchecked_use_of_nullable_value
+  error - The method 'PrintReceiptEvent' isn't defined for the type '_CheckoutPageState' - lib\features\billing\presentation\pages\checkout_page.dart:500:41 - undefined_method
+  error - The property 'isPrinting' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\checkout_page.dart:517:57 - unchecked_use_of_nullable_value
+   info - The type name 'originalHomePage' isn't an UpperCamelCase identifier - lib\features\billing\presentation\pages\hhhomepage.dart:13:7 - camel_case_types
+   info - The type name 'originalHomePageState' isn't an UpperCamelCase identifier - lib\features\billing\presentation\pages\hhhomepage.dart:20:7 - camel_case_types
+  error - The method 'ScanBarcodeEvent' isn't defined for the type 'originalHomePageState' - lib\features\billing\presentation\pages\hhhomepage.dart:87:43 - undefined_method
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\pages\hhhomepage.dart:97:39 - non_type_as_type_argument
+  error - The property 'error' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:99:18 - unchecked_use_of_nullable_value
+  error - The property 'error' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:99:35 - unchecked_use_of_nullable_value
+  error - The property 'error' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:99:52 - unchecked_use_of_nullable_value
+  error - The property 'error' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:101:21 - unchecked_use_of_nullable_value
+  error - The property 'error' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:104:37 - unchecked_use_of_nullable_value
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\pages\hhhomepage.dart:134:32 - non_type_as_type_argument
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:136:28 - unchecked_use_of_nullable_value
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\hhhomepage.dart:184:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\hhhomepage.dart:227:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\hhhomepage.dart:366:34 - deprecated_member_use
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\pages\hhhomepage.dart:372:36 - non_type_as_type_argument
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:375:21 - unchecked_use_of_nullable_value
+  error - The property 'totalAmount' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:403:37 - unchecked_use_of_nullable_value
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\pages\hhhomepage.dart:421:40 - non_type_as_type_argument
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:423:29 - unchecked_use_of_nullable_value
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:430:38 - unchecked_use_of_nullable_value
+  error - The property 'cartItems' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\hhhomepage.dart:434:42 - unchecked_use_of_nullable_value
+  error - The method 'UpdateQuantityEvent' isn't defined for the type 'originalHomePageState' - lib\features\billing\presentation\pages\hhhomepage.dart:533:57 - undefined_method
+  error - The method 'RemoveProductFromCartEvent' isn't defined for the type 'originalHomePageState' - lib\features\billing\presentation\pages\hhhomepage.dart:538:34 - undefined_method
+  error - The method 'UpdateQuantityEvent' isn't defined for the type 'originalHomePageState' - lib\features\billing\presentation\pages\hhhomepage.dart:552:55 - undefined_method
+  error - The method 'LoadTodaySummaryEvent' isn't defined for the type 'HomePage' - lib\features\billing\presentation\pages\home_page.dart:219:55 - undefined_method
+  error - The name 'BillingState' isn't a type, so it can't be used as a type argument - lib\features\billing\presentation\pages\home_page.dart:226:40 - non_type_as_type_argument
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\home_page.dart:236:58 - deprecated_member_use
+  error - The property 'todayRevenue' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\home_page.dart:256:37 - unchecked_use_of_nullable_value
+  error - The property 'todayOrdersCount' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\home_page.dart:284:50 - unchecked_use_of_nullable_value
+  error - The property 'todayItemsSold' can't be unconditionally accessed because the receiver can be 'null' - lib\features\billing\presentation\pages\home_page.dart:314:50 - unchecked_use_of_nullable_value
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\home_page.dart:405:34 - deprecated_member_use
+warning - Unused import: 'package:billing_app/features/billing/presentation/pages/home_page.dart' - lib\features\billing\presentation\pages\reports_page.dart:1:8 - unused_import
+warning - Unused import: 'package:flutter_bloc/flutter_bloc.dart' - lib\features\billing\presentation\pages\reports_page.dart:3:8 - unused_import
+warning - Unused import: '../bloc/billing_bloc.dart' - lib\features\billing\presentation\pages\reports_page.dart:6:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:162:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:181:43 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:311:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\reports_page.dart:340:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\scanner_page.dart:172:61 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\billing\presentation\pages\scanner_page.dart:216:29 - deprecated_member_use
+   info - Unnecessary 'const' keyword - lib\features\billing\presentation\widgets\digital_receipt_dialog.dart:68:58 - unnecessary_const
+  error - The method 'CompleteTransactionEvent' isn't defined for the type 'DigitalReceiptDialog' - lib\features\billing\presentation\widgets\digital_receipt_dialog.dart:158:61 - undefined_method
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\customer\presentation\pages\customer_list_page.dart:134:33 - deprecated_member_use
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:9:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:11:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:13:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:15:16 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:17:13 - overridden_fields
+   info - Field overrides a field inherited from 'Product' - lib\features\product\data\models\product_model.dart:19:19 - overridden_fields
+   info - Use 'const' with the constructor to improve performance - lib\features\product\data\repositories\product_repository_impl.dart:35:16 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\product\data\repositories\product_repository_impl.dart:35:21 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\add_product_page.dart:110:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\edit_product_page.dart:81:52 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\edit_product_page.dart:84:56 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\edit_product_page.dart:99:42 - deprecated_member_use
+warning - Unused import: '../../../../core/theme/app_theme.dart' - lib\features\product\presentation\pages\product_list_page.dart:5:8 - unused_import
+   info - Use 'const' with the constructor to improve performance - lib\features\product\presentation\pages\product_list_page.dart:150:20 - prefer_const_constructors
+   info - Use 'const' with the constructor to improve performance - lib\features\product\presentation\pages\product_list_page.dart:150:34 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\product\presentation\pages\product_list_page.dart:184:40 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\settings\presentation\pages\settings_page.dart:44:77 - prefer_const_constructors
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:68:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:109:40 - deprecated_member_use
+   info - Use 'const' with the constructor to improve performance - lib\features\settings\presentation\pages\settings_page.dart:178:30 - prefer_const_constructors
+   info - Use 'const' literals as arguments to constructors of '@immutable' classes - lib\features\settings\presentation\pages\settings_page.dart:179:35 - prefer_const_literals_to_create_immutables
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:212:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\settings\presentation\pages\settings_page.dart:333:40 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\settings\presentation\pages\settings_page.dart:351:21 - deprecated_member_use
+   info - 'activeColor' is deprecated and shouldn't be used. Use activeThumbColor instead. This feature was deprecated after v3.31.0-2.0.pre - lib\features\settings\presentation\pages\settings_page.dart:365:21 - deprecated_member_use
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:9:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:11:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:13:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:15:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:17:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:19:16 - overridden_fields
+   info - Field overrides a field inherited from 'Shop' - lib\features\shop\data\models\shop_model.dart:21:16 - overridden_fields
+   info - Unnecessary 'this.' qualifier - lib\features\shop\domain\entities\shop.dart:37:29 - unnecessary_this
+warning - The left operand can't be null, so the right operand is never executed - lib\features\shop\domain\entities\shop.dart:37:29 - dead_null_aware_expression
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shop\presentation\pages\shop_details_page.dart:148:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shop\presentation\pages\shop_details_page.dart:216:46 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\features\shop\presentation\pages\shop_details_page.dart:287:46 - deprecated_member_use
+

@@ -7,8 +7,8 @@ class Bill extends Equatable {
   final double totalAmount;
   final DateTime dateTime;
   final List<CartItem> items;
-
   final bool isPaid;
+  final String? customerId;
 
   const Bill({
     required this.id,
@@ -17,10 +17,12 @@ class Bill extends Equatable {
     required this.dateTime,
     required this.items,
     this.isPaid = true,
+    this.customerId,
   });
 
   @override
-  List<Object> get props => [id, billNumber, totalAmount, dateTime, items, isPaid];
+  List<Object?> get props =>
+      [id, billNumber, totalAmount, dateTime, items, isPaid, customerId];
 
   Bill copyWith({
     String? id,
@@ -29,6 +31,7 @@ class Bill extends Equatable {
     DateTime? dateTime,
     List<CartItem>? items,
     bool? isPaid,
+    String? customerId,
   }) {
     return Bill(
       id: id ?? this.id,
@@ -37,6 +40,7 @@ class Bill extends Equatable {
       dateTime: dateTime ?? this.dateTime,
       items: items ?? this.items,
       isPaid: isPaid ?? this.isPaid,
+      customerId: customerId ?? this.customerId,
     );
   }
 }

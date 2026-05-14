@@ -57,9 +57,18 @@ dev_dependencies:
   # Code Generation
   build_runner: ^2.4.8
   json_serializable: ^6.7.1
+  flutter_launcher_icons: ^0.14.4
   
 
 flutter:
   uses-material-design: true
 
-
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/app_icon.jpg"
+  web:
+    generate: true
+    image_path: "assets/icon/app_icon.jpg"
+    background_color: "#ffffff"
+    theme_color: "#ffffff"

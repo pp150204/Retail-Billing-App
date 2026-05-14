@@ -22,7 +22,7 @@ class _ProductListPageState extends State<ProductListPage> with SingleTickerProv
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(length: 2, vsync: this);
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.toLowerCase();
@@ -105,7 +105,6 @@ class _ProductListPageState extends State<ProductListPage> with SingleTickerProv
               tabs: const [
                 Tab(text: 'All Products'),
                 Tab(text: 'Low Stock'),
-                Tab(text: 'Categories'),
               ],
             ),
           ),
@@ -116,7 +115,6 @@ class _ProductListPageState extends State<ProductListPage> with SingleTickerProv
         children: [
           _buildProductList(context, filterLowStock: false),
           _buildProductList(context, filterLowStock: true),
-          const Center(child: Text("Categories View", style: TextStyle(color: Colors.grey))),
         ],
       ),
       floatingActionButton: FloatingActionButton(

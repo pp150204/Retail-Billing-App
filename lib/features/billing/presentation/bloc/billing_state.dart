@@ -8,6 +8,7 @@ class BillingState extends Equatable {
   final double todayRevenue;
   final int todayOrdersCount;
   final int todayItemsSold;
+  final Customer? selectedCustomer;
 
   const BillingState({
     this.cartItems = const [],
@@ -17,6 +18,7 @@ class BillingState extends Equatable {
     this.todayRevenue = 0.0,
     this.todayOrdersCount = 0,
     this.todayItemsSold = 0,
+    this.selectedCustomer,
   });
 
   double get totalAmount => cartItems.fold(0, (sum, item) => sum + item.total);
@@ -30,6 +32,8 @@ class BillingState extends Equatable {
     double? todayRevenue,
     int? todayOrdersCount,
     int? todayItemsSold,
+    Customer? selectedCustomer,
+    bool clearCustomer = false,
   }) {
     return BillingState(
       cartItems: cartItems ?? this.cartItems,
@@ -39,6 +43,7 @@ class BillingState extends Equatable {
       todayRevenue: todayRevenue ?? this.todayRevenue,
       todayOrdersCount: todayOrdersCount ?? this.todayOrdersCount,
       todayItemsSold: todayItemsSold ?? this.todayItemsSold,
+      selectedCustomer: clearCustomer ? null : (selectedCustomer ?? this.selectedCustomer),
     );
   }
 
@@ -50,6 +55,7 @@ class BillingState extends Equatable {
         printSuccess,
         todayRevenue,
         todayOrdersCount,
-        todayItemsSold
+        todayItemsSold,
+        selectedCustomer,
       ];
 }

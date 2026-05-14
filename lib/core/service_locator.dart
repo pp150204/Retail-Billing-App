@@ -12,6 +12,10 @@ import '../../features/settings/domain/repositories/printer_repository.dart';
 import '../../features/settings/presentation/bloc/printer_bloc.dart';
 import '../../features/billing/data/repositories/bill_repository_impl.dart';
 import '../../features/billing/domain/repositories/bill_repository.dart';
+import '../../features/customer/data/repositories/customer_repository_impl.dart';
+import '../../features/customer/domain/repositories/customer_repository.dart';
+import '../../features/customer/domain/usecases/customer_usecases.dart';
+import '../../features/customer/presentation/bloc/customer_bloc.dart';
 import 'utils/notification_service.dart';
 
 final sl = GetIt.instance;
@@ -44,12 +48,27 @@ Future<void> init() async {
     ),
   );
 
+  sl.registerFactory(
+    () => CustomerBloc(
+      getCustomersUseCase: sl(),
+      addCustomerUseCase: sl(),
+      updateCustomerUseCase: sl(),
+      deleteCustomerUseCase: sl(),
+    ),
+  );
+
   // Use cases
   sl.registerLazySingleton(() => GetProductsUseCase(sl()));
   sl.registerLazySingleton(() => AddProductUseCase(sl()));
   sl.registerLazySingleton(() => UpdateProductUseCase(sl()));
   sl.registerLazySingleton(() => DeleteProductUseCase(sl()));
   sl.registerLazySingleton(() => GetProductByBarcodeUseCase(sl()));
+
+  sl.registerLazySingleton(() => GetCustomersUseCase(sl()));
+  sl.registerLazySingleton(() => AddCustomerUseCase(sl()));
+  sl.registerLazySingleton(() => UpdateCustomerUseCase(sl()));
+  sl.registerLazySingleton(() => DeleteCustomerUseCase(sl()));
+  sl.registerLazySingleton(() => GetCustomerByPhoneUseCase(sl()));
 
   // Repository
   sl.registerLazySingleton<ProductRepository>(
@@ -69,6 +88,11 @@ Future<void> init() async {
   // Features - Settings / Printer
   sl.registerLazySingleton<PrinterRepository>(
     () => PrinterRepositoryImpl(),
+  );
+
+  // Features - Customer
+  sl.registerLazySingleton<CustomerRepository>(
+    () => CustomerRepositoryImpl(),
   );
 
   // Features - Billing

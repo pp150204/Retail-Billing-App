@@ -109,4 +109,45 @@ class BillRepositoryImpl implements BillRepository {
       'itemsSold': itemsResult[0]['itemsSold'] ?? 0,
     };
   }
+
+  @override
+  Future<void> updateBillStatus(String billId, bool isPaid) async {
+    final db = await SqliteDatabase.database;
+    await db.update(
+      SqliteDatabase.billTable,
+      {'isPaid': isPaid ? 1 : 0},
+      where: 'id = ?',
+      whereArgs: [billId],
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> getSalesAnalytics() async {
+    final db = await SqliteDatabase.database;
+
+    // Total stats
+    final List<Map<String, dynamic>> totals = await db.rawQuery('''
+      SELECT 
+        COUNT(*) as totalOrders,
+        SUM(totalAmount) as totalRevenue,
+        SUM(CASE WHEN isPaid = 0 THEN totalAmount ELSE 0 END) as unpaidAmount
+      FROM ${SqliteDatabase.billTable}
+    ''');
+
+    // Top selling products
+    final List<Map<String, dynamic>> topProducts = await db.rawQuery('''
+      SELECT productName, SUM(quantity) as totalQty, SUM(total) as totalRevenue
+      FROM ${SqliteDatabase.orderItemsTable}
+      GROUP BY productName
+      ORDER BY totalQty DESC
+      LIMIT 5
+    ''');
+
+    return {
+      'totalOrders': totals[0]['totalOrders'] ?? 0,
+      'totalRevenue': totals[0]['totalRevenue'] ?? 0.0,
+      'unpaidAmount': totals[0]['unpaidAmount'] ?? 0.0,
+      'topProducts': topProducts,
+    };
+  }
 }

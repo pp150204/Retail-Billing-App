@@ -9,6 +9,9 @@ import '../../features/settings/presentation/pages/settings_page.dart';
 import '../../features/billing/presentation/pages/scanner_page.dart';
 import '../../features/billing/presentation/pages/checkout_page.dart';
 import '../../features/billing/presentation/pages/reports_page.dart';
+import '../../features/customer/presentation/pages/customer_list_page.dart';
+import '../../features/customer/presentation/pages/add_customer_page.dart';
+import '../../features/customer/domain/entities/customer.dart';
 import '../../features/product/domain/entities/product.dart';
 import '../../core/presentation/pages/main_shell_page.dart';
 
@@ -43,6 +46,14 @@ final router = GoRouter(
         StatefulShellBranch(
           routes: [
             GoRoute(
+              path: '/customers',
+              builder: (context, state) => const CustomerListPage(),
+            ),
+          ],
+        ),
+        StatefulShellBranch(
+          routes: [
+            GoRoute(
               path: '/products',
               builder: (context, state) => const ProductListPage(),
             ),
@@ -61,6 +72,17 @@ final router = GoRouter(
     GoRoute(
       path: '/scanner',
       builder: (context, state) => const ScannerPage(),
+    ),
+    GoRoute(
+      path: '/customers/add',
+      builder: (context, state) => const AddCustomerPage(),
+    ),
+    GoRoute(
+      path: '/customers/edit',
+      builder: (context, state) {
+        final customer = state.extra as Customer?;
+        return AddCustomerPage(customer: customer);
+      },
     ),
     GoRoute(
       path: '/checkout',

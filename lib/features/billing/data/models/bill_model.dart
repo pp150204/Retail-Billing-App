@@ -11,9 +11,10 @@ class BillModel extends Bill {
     required super.dateTime,
     required super.items,
     required super.isPaid,
+    super.customerId,
   });
 
-  factory BillModel.fromCartItems(List<CartItem> items, double totalAmount) {
+  factory BillModel.fromCartItems(List<CartItem> items, double totalAmount, {String? customerId}) {
     final now = DateTime.now();
     final billNumber = 'BILL-${now.millisecondsSinceEpoch}';
     return BillModel(
@@ -23,6 +24,7 @@ class BillModel extends Bill {
       dateTime: now,
       items: items,
       isPaid: true,
+      customerId: customerId,
     );
   }
 
@@ -33,6 +35,7 @@ class BillModel extends Bill {
       'totalAmount': totalAmount,
       'dateTime': dateTime.toIso8601String(),
       'isPaid': isPaid ? 1 : 0,
+      'customerId': customerId,
     };
   }
 
@@ -44,6 +47,7 @@ class BillModel extends Bill {
       dateTime: DateTime.parse(map['dateTime']),
       items: items,
       isPaid: map['isPaid'] == 1,
+      customerId: map['customerId'],
     );
   }
 
@@ -55,6 +59,7 @@ class BillModel extends Bill {
     DateTime? dateTime,
     List<CartItem>? items,
     bool? isPaid,
+    String? customerId,
   }) {
     return BillModel(
       id: id ?? this.id,
@@ -63,6 +68,7 @@ class BillModel extends Bill {
       dateTime: dateTime ?? this.dateTime,
       items: items ?? this.items,
       isPaid: isPaid ?? this.isPaid,
+      customerId: customerId ?? this.customerId,
     );
   }
 }

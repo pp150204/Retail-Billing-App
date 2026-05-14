@@ -81,6 +81,11 @@ class MainShellPage extends StatelessWidget {
                     label: 'Cart',
                   ),
                   NavigationDestination(
+                    icon: Icon(Icons.people_outline, color: Colors.grey),
+                    selectedIcon: Icon(Icons.people_rounded, color: Color(0xFF2B4D9D)),
+                    label: 'Customers',
+                  ),
+                  NavigationDestination(
                     icon: Icon(Icons.inventory_2_outlined, color: Colors.grey),
                     selectedIcon: Icon(Icons.inventory_2_rounded, color: Color(0xFF2B4D9D)),
                     label: 'Inventory',

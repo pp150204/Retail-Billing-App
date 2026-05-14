@@ -83,7 +83,17 @@ class DigitalReceiptDialog extends StatelessWidget {
                           children: [
                             Expanded(
                               flex: 3,
-                              child: Text('${item['name']}', style: const TextStyle(fontSize: 12)),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('${item['name']}', style: const TextStyle(fontSize: 12)),
+                                  if (item['expiryDate'] != null)
+                                    Text(
+                                      'Exp: ${DateFormat('dd/MM/yyyy').format(item['expiryDate'] as DateTime)}',
+                                      style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+                                    ),
+                                ],
+                              ),
                             ),
                             Expanded(
                               child: Text('${item['qty']}', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12)),

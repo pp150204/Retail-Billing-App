@@ -170,6 +170,14 @@ class PrinterHelper {
       String line = prefix.padRight(16) + price.padRight(8) + totalItem;
       bytes += _textToBytes(line);
       bytes += EscPos.lineFeed;
+
+      // Add expiry date if available
+      if (item['expiryDate'] != null && item['expiryDate'] is DateTime) {
+        final expDate = item['expiryDate'] as DateTime;
+        String expLine = '  Exp: ${DateFormat('dd/MM/yyyy').format(expDate)}';
+        bytes += _textToBytes(expLine);
+        bytes += EscPos.lineFeed;
+      }
     }
 
     bytes += _textToBytes('--------------------------------');

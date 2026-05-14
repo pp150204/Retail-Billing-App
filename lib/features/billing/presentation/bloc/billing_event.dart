@@ -6,6 +6,15 @@ abstract class BillingEvent extends Equatable {
   List<Object> get props => [];
 }
 
+class SelectCustomerEvent extends BillingEvent {
+  final Customer customer;
+  const SelectCustomerEvent(this.customer);
+  @override
+  List<Object> get props => [customer];
+}
+
+class DeselectCustomerEvent extends BillingEvent {}
+
 class ScanBarcodeEvent extends BillingEvent {
   final String barcode;
   const ScanBarcodeEvent(this.barcode);

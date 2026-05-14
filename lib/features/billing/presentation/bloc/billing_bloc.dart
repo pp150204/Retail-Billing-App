@@ -4,10 +4,12 @@ import '../../domain/entities/cart_item.dart';
 import '../../domain/entities/bill.dart';
 import '../../domain/repositories/bill_repository.dart';
 import '../../data/models/bill_model.dart';
-import 'package:billing_app/features/product/domain/entities/product.dart';
-import 'package:billing_app/features/product/domain/usecases/product_usecases.dart';
+import '../../../product/domain/entities/product.dart';
+import '../../../product/domain/usecases/product_usecases.dart';
 import '../../../../core/utils/printer_helper.dart';
 import '../../../settings/domain/repositories/printer_repository.dart';
+import '../../../customer/domain/usecases/customer_usecases.dart';
+import '../../../customer/domain/entities/customer.dart';
 
 part 'billing_event.dart';
 part 'billing_state.dart';
@@ -16,11 +18,13 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
   final GetProductByBarcodeUseCase getProductByBarcodeUseCase;
   final PrinterRepository printerRepository;
   final BillRepository billRepository;
+  final UpdateCustomerUseCase updateCustomerUseCase;
 
   BillingBloc({
     required this.getProductByBarcodeUseCase,
     required this.printerRepository,
     required this.billRepository,
+    required this.updateCustomerUseCase,
   }) : super(const BillingState()) {
     on<ScanBarcodeEvent>(_onScanBarcode);
     on<AddProductToCartEvent>(_onAddProductToCart);
@@ -30,9 +34,19 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
     on<PrintReceiptEvent>(_onPrintReceipt);
     on<LoadTodaySummaryEvent>(_onLoadTodaySummary);
     on<CompleteTransactionEvent>(_onCompleteTransaction);
+    on<SelectCustomerEvent>(_onSelectCustomer);
+    on<DeselectCustomerEvent>(_onDeselectCustomer);
 
     // Load initial summary
     add(LoadTodaySummaryEvent());
+  }
+
+  void _onSelectCustomer(SelectCustomerEvent event, Emitter<BillingState> emit) {
+    emit(state.copyWith(selectedCustomer: event.customer));
+  }
+
+  void _onDeselectCustomer(DeselectCustomerEvent event, Emitter<BillingState> emit) {
+    emit(state.copyWith(clearCustomer: true));
   }
 
   Future<void> _onCompleteTransaction(
@@ -43,8 +57,22 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
       final bill = BillModel.fromCartItems(
         List.from(state.cartItems),
         state.totalAmount,
+        customerId: state.selectedCustomer?.id,
       ).copyWith(isPaid: event.isPaid);
+      
       await billRepository.saveBill(bill);
+
+      // Loyalty points logic: 1 point per 100 spent
+      if (state.selectedCustomer != null) {
+        final earnedPoints = (state.totalAmount / 100).floor();
+        if (earnedPoints > 0) {
+          final updatedCustomer = state.selectedCustomer!.copyWith(
+            points: state.selectedCustomer!.points + earnedPoints,
+          );
+          await updateCustomerUseCase.execute(updatedCustomer);
+        }
+      }
+
       add(LoadTodaySummaryEvent());
       add(ClearCartEvent());
       emit(state.copyWith(printSuccess: true));
@@ -156,6 +184,7 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
                 'qty': item.quantity,
                 'price': item.product.price,
                 'total': item.total,
+                'expiryDate': item.product.expiryDate,
               })
           .toList();
 
@@ -172,8 +201,22 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
       final bill = BillModel.fromCartItems(
         List.from(state.cartItems),
         state.totalAmount,
+        customerId: state.selectedCustomer?.id,
       ).copyWith(isPaid: event.isPaid);
+      
       await billRepository.saveBill(bill);
+
+      // Loyalty points logic: 1 point per 100 spent
+      if (state.selectedCustomer != null) {
+        final earnedPoints = (state.totalAmount / 100).floor();
+        if (earnedPoints > 0) {
+          final updatedCustomer = state.selectedCustomer!.copyWith(
+            points: state.selectedCustomer!.points + earnedPoints,
+          );
+          await updateCustomerUseCase.execute(updatedCustomer);
+        }
+      }
+
       add(LoadTodaySummaryEvent());
 
       emit(state.copyWith(isPrinting: false, printSuccess: true));

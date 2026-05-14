@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pretty_qr_code/pretty_qr_code.dart';
-
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../../../shop/presentation/bloc/shop_bloc.dart';
 import '../../../customer/presentation/bloc/customer_bloc.dart';
 import '../../../customer/domain/entities/customer.dart';
 import '../bloc/billing_bloc.dart';
-
+import '../widgets/customer_picker_bottom_sheet.dart';
 import '../widgets/digital_receipt_dialog.dart';
 
 class CheckoutPage extends StatefulWidget {
@@ -21,105 +22,12 @@ class CheckoutPage extends StatefulWidget {
 class _CheckoutPageState extends State<CheckoutPage> {
   bool _isPaid = true;
 
-  void _showCustomerSelector(BuildContext context) {
-    context.read<CustomerBloc>().add(LoadCustomersEvent());
+  void _showCustomerPicker(BuildContext context) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Container(
-        height: MediaQuery.of(context).size.height * 0.75,
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-        ),
-        child: Column(
-          children: [
-            const SizedBox(height: 12),
-            Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.grey[300],
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.all(24),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Select Customer',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  TextButton.icon(
-                    onPressed: () {
-                      Navigator.pop(context);
-                      context.push('/customers/add');
-                    },
-                    icon: const Icon(Icons.add),
-                    label: const Text('New'),
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: TextField(
-                onChanged: (value) {
-                  context.read<CustomerBloc>().add(SearchCustomersEvent(value));
-                },
-                decoration: InputDecoration(
-                  hintText: 'Search by name or phone...',
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.grey[100],
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                    borderSide: BorderSide.none,
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Expanded(
-              child: BlocBuilder<CustomerBloc, CustomerState>(
-                builder: (context, state) {
-                  if (state.status == CustomerStatus.loading) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (state.filteredCustomers.isEmpty) {
-                    return const Center(child: Text('No customers found'));
-                  }
-                  return ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: state.filteredCustomers.length,
-                    itemBuilder: (context, index) {
-                      final customer = state.filteredCustomers[index];
-                      return ListTile(
-                        leading: CircleAvatar(
-                          backgroundColor: const Color(0xFFEEF2FF),
-                          child: Text(
-                            customer.name[0].toUpperCase(),
-                            style: const TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        title: Text(customer.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                        subtitle: Text(customer.phone),
-                        onTap: () {
-                          context.read<BillingBloc>().add(SelectCustomerEvent(customer));
-                          Navigator.pop(context);
-                        },
-                      );
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) => const CustomerPickerBottomSheet(),
     );
   }
 
@@ -128,36 +36,29 @@ class _CheckoutPageState extends State<CheckoutPage> {
     const borderColor = Color(0xFFE5E5EA);
 
     return PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (bool didPop, dynamic result) {
-          if (didPop) return;
-          context.read<BillingBloc>().add(ClearCartEvent());
-          context.go('/');
-        },
+        canPop: true,
         child: Scaffold(
           appBar: AppBar(
-            title: const Text('Checkout',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+            title: Text('Checkout',
+                style: GoogleFonts.outfit(fontSize: 20, fontWeight: FontWeight.bold, color: const Color(0xFF1E293B))),
             centerTitle: true,
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.white,
             elevation: 0,
+            surfaceTintColor: Colors.white,
             leading: IconButton(
-              icon: Icon(Icons.chevron_left,
-                  size: 28, color: Theme.of(context).primaryColor),
+              icon: Icon(Icons.chevron_left_rounded,
+                  size: 28, color: AppTheme.primaryColor),
               onPressed: () {
-                context.read<BillingBloc>().add(ClearCartEvent());
-                context.go('/');
+                Navigator.pop(context);
               },
             ),
           ),
+          backgroundColor: const Color(0xFFF8FAFC),
           body: BlocConsumer<BillingBloc, BillingState>(
             listener: (context, state) {
               if (state.printSuccess) {
-                ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                    content: Text('Printed successfully'),
-                    backgroundColor: Colors.green));
-                // context.read<BillingBloc>().add(ClearCartEvent());
-                // context.go('/');
+                // Navigate back to the very start of the billing flow
+                context.go('/');
               }
             },
             builder: (context, billingState) {
@@ -171,360 +72,485 @@ class _CheckoutPageState extends State<CheckoutPage> {
                       shopName = shopState.shop.name;
                     }
 
-                    return Column(
-                      children: [
-                        Expanded(
-                          child: SingleChildScrollView(
-                            padding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 16),
-                            child: Column(
+                    return SingleChildScrollView(
+                      padding: const EdgeInsets.fromLTRB(16, 16, 16, 100), // Bottom padding for FAB/Buttons
+                      child: Column(
+                        children: [
+                          // 1. Customer Selection
+                          _buildCustomerSection(context, billingState),
+                          const SizedBox(height: 20),
+
+                          // 2. Order Summary Title
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            child: Row(
                               children: [
-                                  // Customer Selection
-                                  Container(
-                                    padding: const EdgeInsets.all(16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: borderColor),
+                                Icon(Icons.receipt_long_rounded, size: 18, color: Colors.grey[600]),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'ORDER SUMMARY',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          // 3. Product Table
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              border: Border.all(color: borderColor),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.02),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                )
+                              ],
+                            ),
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(16),
+                              child: Table(
+                                border: const TableBorder(
+                                  horizontalInside: BorderSide(color: borderColor),
+                                ),
+                                children: [
+                                  // Header row
+                                  TableRow(
+                                    decoration: const BoxDecoration(
+                                      color: Color(0xFFF8FAFC),
+                                      border: Border(bottom: BorderSide(color: borderColor)),
                                     ),
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      _buildHeaderCell('Product', TextAlign.left),
+                                      _buildHeaderCell('Price', TextAlign.right),
+                                      _buildHeaderCell('Total', TextAlign.right),
+                                    ],
+                                  ),
+                                  // Items rows
+                                  ...billingState.cartItems.map((item) {
+                                    return TableRow(
                                       children: [
-                                        Row(
-                                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            const Text(
-                                              'CUSTOMER',
-                                              style: TextStyle(
-                                                fontSize: 12,
-                                                fontWeight: FontWeight.bold,
-                                                color: Colors.grey,
-                                                letterSpacing: 1.2,
-                                              ),
-                                            ),
-                                            if (billingState.selectedCustomer != null)
-                                              TextButton(
-                                                onPressed: () => context.read<BillingBloc>().add(DeselectCustomerEvent()),
-                                                style: TextButton.styleFrom(padding: EdgeInsets.zero, minimumSize: const Size(0, 0)),
-                                                child: const Text('Remove', style: TextStyle(color: Colors.red, fontSize: 12)),
-                                              ),
-                                          ],
+                                        _buildDataCell(
+                                          '${item.quantity} x ${item.product.name}',
+                                          TextAlign.left,
                                         ),
-                                        const SizedBox(height: 8),
-                                        if (billingState.selectedCustomer == null)
-                                          InkWell(
-                                            onTap: () {
-                                              _showCustomerSelector(context);
-                                            },
-                                            child: Container(
-                                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                              decoration: BoxDecoration(
-                                                color: const Color(0xFFF8FAFC),
-                                                borderRadius: BorderRadius.circular(8),
-                                                border: Border.all(color: borderColor),
-                                              ),
-                                              child: const Row(
-                                                children: [
-                                                  Icon(Icons.person_add_outlined, size: 20, color: Color(0xFF1E3A8A)),
-                                                  SizedBox(width: 12),
-                                                  Text('Select or Add Customer', style: TextStyle(color: Colors.grey)),
-                                                ],
-                                              ),
-                                            ),
-                                          )
-                                        else
-                                          ListTile(
-                                            contentPadding: EdgeInsets.zero,
-                                            leading: CircleAvatar(
-                                              backgroundColor: const Color(0xFFEEF2FF),
-                                              child: Text(
-                                                billingState.selectedCustomer!.name[0].toUpperCase(),
-                                                style: const TextStyle(color: Color(0xFF4F46E5), fontWeight: FontWeight.bold),
-                                              ),
-                                            ),
-                                            title: Text(billingState.selectedCustomer!.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                                            subtitle: Text('${billingState.selectedCustomer!.phone} • ${billingState.selectedCustomer!.points} Points'),
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-
-                                  // Table
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      color: Colors.white,
-                                      borderRadius: BorderRadius.circular(12),
-                                      border: Border.all(color: borderColor),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black.withOpacity(0.05),
-                                          blurRadius: 12,
-                                          offset: const Offset(0, 4),
-                                        )
-                                      ],
-                                    ),
-                                    child: ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Table(
-                                        border: const TableBorder(
-                                          horizontalInside:
-                                          BorderSide(color: borderColor),
-                                          bottom: BorderSide(color: borderColor),
+                                        _buildDataCell(
+                                          '₹${item.product.price.toStringAsFixed(2)}',
+                                          TextAlign.right,
+                                          isSubtitle: true,
                                         ),
-                                        children: [
-                                          // Header row
-                                          TableRow(
-                                            decoration: const BoxDecoration(
-                                              color: Color(0xFFF8FAFC),
-                                              border: Border(
-                                                  bottom:
-                                                  BorderSide(color: borderColor)),
-                                            ),
-                                            children: [
-                                              _buildHeaderCell(
-                                                  'Product Name', TextAlign.left),
-                                              _buildHeaderCell(
-                                                  'Price', TextAlign.right),
-                                              _buildHeaderCell(
-                                                  'Total', TextAlign.right),
-                                            ],
-                                          ),
-                                          // Items rows
-                                          ...billingState.cartItems.map((item) {
-                                            return TableRow(
-                                              children: [
-                                                _buildDataCell(
-                                                  '${item.quantity} x ${item.product.name}',
-                                                  TextAlign.left,
-                                                ),
-                                                _buildDataCell(
-                                                    '₹${item.product.price.toStringAsFixed(2)}',
-                                                    TextAlign.right,
-                                                    isSubtitle: true),
-                                                _buildDataCell(
-                                                    '₹${item.total.toStringAsFixed(2)}',
-                                                    TextAlign.right,
-                                                    isBold: true),
-                                              ],
-                                            );
-                                          }),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 24),
-
-                                  const SizedBox(
-                                      height: 120), // padding for bottom fixed bar
+                                        _buildDataCell(
+                                          '₹${item.total.toStringAsFixed(2)}',
+                                          TextAlign.right,
+                                          isBold: true,
+                                        ),
+                                      ],
+                                    );
+                                  }),
                                 ],
                               ),
                             ),
                           ),
+                          const SizedBox(height: 24),
 
-                        // Bottom Bar
-                        Container(
-                          decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.9),
-                            borderRadius: const BorderRadius.horizontal(
-                                left: Radius.circular(24),
-                                right: Radius.circular(24)),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.05),
-                                blurRadius: 10,
-                                offset: const Offset(0, -4),
-                              ),
-                            ],
+                          // 4. Payment Status (Paid/Unpaid)
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                            child: Row(
+                              children: [
+                                Icon(Icons.payments_rounded, size: 18, color: Colors.grey[600]),
+                                const SizedBox(width: 8),
+                                Text(
+                                  'PAYMENT STATUS',
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.grey[600],
+                                    letterSpacing: 1,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                          Row(
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 20,
-                                ),
-                                child: Column(
-                                  children: [
-                                    const SizedBox(
-                                      height: 8,
-                                    ),
-                                    upiId.isNotEmpty
-                                        ? Column(
-                                      children: [
-                                        const Text(
-                                          'Scan to Pay',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.black87,
-                                            letterSpacing: 1.1,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 12),
-                                        SizedBox(
-                                          width: 180,
-                                          height: 180,
-                                          child: PrettyQrView.data(
-                                            data:
-                                            'upi://pay?pa=$upiId&pn=$shopName&am=${billingState.totalAmount.toStringAsFixed(2)}&cu=INR',
-                                          ),
-                                        ),
-                                      ],
-                                    )
-                                        : const SizedBox.shrink(),
-                                    const SizedBox(height: 15),
-                                    Row(
-                                      mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          'GRAND TOTAL',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.bold,
-                                            color: Colors.grey[400],
-                                            letterSpacing: 1.2,
-                                          ),
-                                        ),
-                                        Text(
-                                          '₹${billingState.totalAmount.toStringAsFixed(2)}',
-                                          style: const TextStyle(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.bold,
-                                            letterSpacing: -0.5,
-                                            color: Color(0xFF0F172A),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                              Expanded(
+                                child: _buildPaymentStatusButton(
+                                  'PAID',
+                                  _isPaid,
+                                  const Color(0xFF22C55E),
+                                  () => setState(() => _isPaid = true),
                                 ),
                               ),
-                              PrimaryButton(
-                                onPressed: () {
-                                  if (shopState is ShopLoaded) {
-                                    final items = billingState.cartItems
-                                        .map((item) => {
-                                              'name': item.product.name,
-                                              'qty': item.quantity,
-                                              'price': item.product.price,
-                                              'total': item.total,
-                                              'expiryDate': item.product.expiryDate,
-                                            })
-                                        .toList();
-
-                                    showDialog(
-                                      context: context,
-                                      builder: (context) => DigitalReceiptDialog(
-                                        shopName: shopState.shop.name,
-                                        address1: shopState.shop.addressLine1,
-                                        address2: shopState.shop.addressLine2,
-                                        phone: shopState.shop.phoneNumber,
-                                        total: billingState.totalAmount,
-                                        items: items,
-                                        footer: shopState.shop.footerText,
-                                        isPaid: _isPaid,
-                                      ),
-                                    );
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content:
-                                            Text('Shop details not loaded'),
-                                            backgroundColor: Colors.red));
-                                  }
-                                },
-                                label: 'Preview & Complete',
-                                icon: Icons.visibility_outlined,
-                                backgroundColor: const Color(0xFF1E293B),
-                              ),
-                              const SizedBox(height: 8),
-                              Padding(
-                                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
-                                child: Row(
-                                  children: [
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _isPaid = true),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 12),
-                                          decoration: BoxDecoration(
-                                            color: _isPaid ? const Color(0xFF22C55E) : Colors.grey[100],
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: _isPaid ? const Color(0xFF22C55E) : Colors.grey[300]!),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              'PAID',
-                                              style: TextStyle(
-                                                color: _isPaid ? Colors.white : Colors.grey[600],
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                    const SizedBox(width: 12),
-                                    Expanded(
-                                      child: GestureDetector(
-                                        onTap: () => setState(() => _isPaid = false),
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(vertical: 12),
-                                          decoration: BoxDecoration(
-                                            color: !_isPaid ? const Color(0xFFEF4444) : Colors.grey[100],
-                                            borderRadius: BorderRadius.circular(12),
-                                            border: Border.all(color: !_isPaid ? const Color(0xFFEF4444) : Colors.grey[300]!),
-                                          ),
-                                          child: Center(
-                                            child: Text(
-                                              'UNPAID',
-                                              style: TextStyle(
-                                                color: !_isPaid ? Colors.white : Colors.grey[600],
-                                                fontWeight: FontWeight.bold,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ],
+                              const SizedBox(width: 12),
+                              Expanded(
+                                child: _buildPaymentStatusButton(
+                                  'UNPAID',
+                                  !_isPaid,
+                                  const Color(0xFFEF4444),
+                                  () => setState(() => _isPaid = false),
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              PrimaryButton(
-                                onPressed: () {
-                                  if (shopState is ShopLoaded) {
-                                    context.read<BillingBloc>().add(
-                                        PrintReceiptEvent(
-                                            shopName: shopState.shop.name,
-                                            address1: shopState.shop.addressLine1,
-                                            address2: shopState.shop.addressLine2,
-                                            phone: shopState.shop.phoneNumber,
-                                            footer: shopState.shop.footerText,
-                                            isPaid: _isPaid));
-                                  } else {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                        const SnackBar(
-                                            content:
-                                            Text('Shop details not loaded'),
-                                            backgroundColor: Colors.red));
-                                  }
-                                },
-                                label: 'Print Receipt',
-                                icon: Icons.print,
-                                isLoading: billingState.isPrinting,
                               ),
                             ],
                           ),
-                        ),
-                      ],
+                          const SizedBox(height: 24),
+
+                          // 5. Scan & Pay Section (QR)
+                          if (upiId.isNotEmpty && _isPaid) ...[
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+                              child: Row(
+                                children: [
+                                  Icon(Icons.qr_code_scanner_rounded, size: 18, color: Colors.grey[600]),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    'SCAN TO PAY',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.grey[600],
+                                      letterSpacing: 1,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              width: double.infinity,
+                              padding: const EdgeInsets.all(24),
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(20),
+                                border: Border.all(color: borderColor),
+                              ),
+                              child: Column(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(16),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(20),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.05),
+                                          blurRadius: 15,
+                                        )
+                                      ],
+                                    ),
+                                    child: SizedBox(
+                                      width: 180,
+                                      height: 180,
+                                      child: PrettyQrView.data(
+                                        data: 'upi://pay?pa=$upiId&pn=$shopName&am=${billingState.totalAmount.toStringAsFixed(2)}&cu=INR',
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 16),
+                                  Text(
+                                    'Scan this QR with any UPI app',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: Colors.grey[500],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+                          ],
+
+                          // 6. Grand Total
+                          Container(
+                            padding: const EdgeInsets.all(24),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF1E293B),
+                              borderRadius: BorderRadius.circular(20),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: const Color(0xFF1E293B).withOpacity(0.3),
+                                  blurRadius: 12,
+                                  offset: const Offset(0, 6),
+                                )
+                              ],
+                            ),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'GRAND TOTAL',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white.withOpacity(0.6),
+                                        letterSpacing: 1.2,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'Inclusive of all taxes',
+                                      style: GoogleFonts.inter(
+                                        fontSize: 10,
+                                        color: Colors.white.withOpacity(0.4),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Text(
+                                  '₹${billingState.totalAmount.toStringAsFixed(2)}',
+                                  style: GoogleFonts.outfit(
+                                    fontSize: 32,
+                                    fontWeight: FontWeight.w800,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          
+                          const SizedBox(height: 32),
+
+                          // 7. Primary Action
+                          PrimaryButton(
+                            onPressed: () {
+                              if (shopState is ShopLoaded) {
+                                final items = billingState.cartItems
+                                    .map((item) => {
+                                          'name': item.product.name,
+                                          'qty': item.quantity,
+                                          'price': item.product.price,
+                                          'total': item.total,
+                                          'expiryDate': item.product.expiryDate,
+                                        })
+                                    .toList();
+
+                                showDialog(
+                                  context: context,
+                                  builder: (context) => DigitalReceiptDialog(
+                                    shopName: shopState.shop.name,
+                                    address1: shopState.shop.addressLine1,
+                                    address2: shopState.shop.addressLine2,
+                                    phone: shopState.shop.phoneNumber,
+                                    total: billingState.totalAmount,
+                                    items: items,
+                                    footer: shopState.shop.footerText,
+                                    isPaid: _isPaid,
+                                    customerName: billingState.selectedCustomer?.name,
+                                    customerPhone: billingState.selectedCustomer?.phone,
+                                    upiId: upiId,
+                                  ),
+                                );
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                        content: Text('Shop details not loaded'),
+                                        backgroundColor: Colors.red));
+                              }
+                            },
+                            label: 'Save & Preview Receipt',
+                            icon: Icons.receipt_long_rounded,
+                            backgroundColor: const Color(0xFF1E293B),
+                          ),
+                          const SizedBox(height: 40),
+                        ],
+                      ),
                     );
                   });
             },
           ),
         ));
+  }
+
+  Widget _buildPaymentStatusButton(String text, bool isSelected, Color activeColor, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? activeColor : Colors.grey[100],
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: isSelected ? activeColor : Colors.grey[300]!),
+        ),
+        child: Center(
+          child: Text(
+            text,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.grey[600],
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildCustomerSection(BuildContext context, BillingState state) {
+    final hasCustomer = state.selectedCustomer != null;
+    final potentialPoints = (state.totalAmount / 100).floor();
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFE5E7EB)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.01),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                'CUSTOMER',
+                style: GoogleFonts.inter(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[400],
+                  letterSpacing: 1,
+                ),
+              ),
+              if (hasCustomer)
+                GestureDetector(
+                  onTap: () => context.read<BillingBloc>().add(DeselectCustomerEvent()),
+                  child: Text(
+                    'Remove',
+                    style: GoogleFonts.inter(
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.redAccent,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          if (hasCustomer)
+            _buildSelectedCustomerTile(context, state.selectedCustomer!, potentialPoints)
+          else
+            _buildLinkCustomerTile(context, potentialPoints),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSelectedCustomerTile(BuildContext context, Customer customer, int potentialPoints) {
+    return InkWell(
+      onTap: () => _showCustomerPicker(context),
+      borderRadius: BorderRadius.circular(12),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: AppTheme.primaryColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            alignment: Alignment.center,
+            child: Text(
+              customer.name.isNotEmpty ? customer.name[0].toUpperCase() : '?',
+              style: GoogleFonts.outfit(
+                color: AppTheme.primaryColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  customer.name,
+                  style: GoogleFonts.outfit(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 15,
+                    color: const Color(0xFF1E293B),
+                  ),
+                ),
+                Text(
+                  '${customer.phone} • ${customer.points} Points',
+                  style: GoogleFonts.inter(
+                    fontSize: 12,
+                    color: Colors.grey[500],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          if (potentialPoints > 0)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF59E0B).withOpacity(0.1),
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: Text(
+                '+$potentialPoints',
+                style: GoogleFonts.outfit(
+                  color: const Color(0xFFD97706),
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLinkCustomerTile(BuildContext context, int potentialPoints) {
+    return InkWell(
+      onTap: () => _showCustomerPicker(context),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 8),
+        child: Row(
+          children: [
+            Icon(Icons.person_add_rounded, color: AppTheme.primaryColor, size: 20),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Select or Add Customer',
+                style: GoogleFonts.inter(
+                  color: Colors.grey[500],
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            if (potentialPoints > 0)
+              Text(
+                'Earn $potentialPoints pts',
+                style: GoogleFonts.inter(
+                  fontSize: 11,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFFF59E0B),
+                ),
+              ),
+            const Icon(Icons.chevron_right_rounded, color: Colors.grey, size: 20),
+          ],
+        ),
+      ),
+    );
   }
 
   Widget _buildHeaderCell(String text, TextAlign align) {
@@ -533,7 +559,7 @@ class _CheckoutPageState extends State<CheckoutPage> {
       child: Text(
         text.toUpperCase(),
         textAlign: align,
-        style: const TextStyle(
+        style: GoogleFonts.inter(
           fontSize: 10,
           fontWeight: FontWeight.bold,
           letterSpacing: 1,
@@ -550,10 +576,10 @@ class _CheckoutPageState extends State<CheckoutPage> {
       child: Text(
         text,
         textAlign: align,
-        style: TextStyle(
+        style: GoogleFonts.inter(
           fontSize: isSubtitle ? 12 : 14,
           fontWeight: isBold ? FontWeight.bold : FontWeight.w500,
-          color: isSubtitle ? Colors.grey[500] : Colors.black87,
+          color: isSubtitle ? Colors.grey[500] : const Color(0xFF1E293B),
         ),
       ),
     );

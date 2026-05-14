@@ -5,7 +5,7 @@ import 'package:sqflite/sqflite.dart';
 class SqliteDatabase {
   static Database? _database;
   static const String _databaseName = 'billing_app.db';
-  static const int _databaseVersion = 6;
+  static const int _databaseVersion = 7;
 
   // Table names
   static const String productTable = 'products';
@@ -43,7 +43,8 @@ class SqliteDatabase {
         barcode TEXT NOT NULL,
         price REAL NOT NULL,
         stock INTEGER NOT NULL,
-        expiryDate TEXT
+        expiryDate TEXT,
+        category TEXT NOT NULL DEFAULT 'Uncategorized'
       )
     ''');
 
@@ -77,7 +78,8 @@ class SqliteDatabase {
         totalAmount REAL NOT NULL,
         dateTime TEXT NOT NULL,
         isPaid INTEGER NOT NULL DEFAULT 1,
-        customerId TEXT
+        customerId TEXT,
+        paymentMethod TEXT NOT NULL DEFAULT 'Cash'
       )
     ''');
 
@@ -104,10 +106,6 @@ class SqliteDatabase {
         points INTEGER NOT NULL DEFAULT 0
       )
     ''');
-
-    // Add customerId to billTable (already handled in upgrade if app is old, but for new install)
-    // Wait, if it's billTable creation in onCreate, I should add it there.
-    // Let's fix billTable creation in onCreate too.
   }
 
   static Future<void> _onUpgrade(
@@ -170,6 +168,16 @@ class SqliteDatabase {
       // Add customerId column to bills table
       await db.execute('''
         ALTER TABLE $billTable ADD COLUMN customerId TEXT
+      ''');
+    }
+    if (oldVersion < 7) {
+      // Add category to products
+      await db.execute('''
+        ALTER TABLE $productTable ADD COLUMN category TEXT NOT NULL DEFAULT 'Uncategorized'
+      ''');
+      // Add paymentMethod to bills
+      await db.execute('''
+        ALTER TABLE $billTable ADD COLUMN paymentMethod TEXT NOT NULL DEFAULT 'Cash'
       ''');
     }
   }

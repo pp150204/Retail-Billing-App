@@ -12,9 +12,10 @@ class BillModel extends Bill {
     required super.items,
     required super.isPaid,
     super.customerId,
+    super.paymentMethod = 'Cash',
   });
 
-  factory BillModel.fromCartItems(List<CartItem> items, double totalAmount, {String? customerId}) {
+  factory BillModel.fromCartItems(List<CartItem> items, double totalAmount, {String? customerId, String paymentMethod = 'Cash'}) {
     final now = DateTime.now();
     final billNumber = 'BILL-${now.millisecondsSinceEpoch}';
     return BillModel(
@@ -25,6 +26,7 @@ class BillModel extends Bill {
       items: items,
       isPaid: true,
       customerId: customerId,
+      paymentMethod: paymentMethod,
     );
   }
 
@@ -36,6 +38,7 @@ class BillModel extends Bill {
       'dateTime': dateTime.toIso8601String(),
       'isPaid': isPaid ? 1 : 0,
       'customerId': customerId,
+      'paymentMethod': paymentMethod,
     };
   }
 
@@ -48,6 +51,7 @@ class BillModel extends Bill {
       items: items,
       isPaid: map['isPaid'] == 1,
       customerId: map['customerId'],
+      paymentMethod: map['paymentMethod'] ?? 'Cash',
     );
   }
 
@@ -60,6 +64,7 @@ class BillModel extends Bill {
     List<CartItem>? items,
     bool? isPaid,
     String? customerId,
+    String? paymentMethod,
   }) {
     return BillModel(
       id: id ?? this.id,
@@ -69,6 +74,7 @@ class BillModel extends Bill {
       items: items ?? this.items,
       isPaid: isPaid ?? this.isPaid,
       customerId: customerId ?? this.customerId,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
     );
   }
 }

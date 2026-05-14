@@ -1,4 +1,4 @@
-import 'package:billing_app/features/billing/presentation/pages/hhhomepage.dart';
+import 'package:billing_app/features/billing/presentation/pages/billing_page.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/billing/presentation/pages/home_page.dart';
 import '../../features/product/presentation/pages/product_list_page.dart';
@@ -11,13 +11,19 @@ import '../../features/billing/presentation/pages/checkout_page.dart';
 import '../../features/billing/presentation/pages/reports_page.dart';
 import '../../features/customer/presentation/pages/customer_list_page.dart';
 import '../../features/customer/presentation/pages/add_customer_page.dart';
+import '../../features/customer/presentation/pages/customer_details_page.dart';
 import '../../features/customer/domain/entities/customer.dart';
 import '../../features/product/domain/entities/product.dart';
 import '../../core/presentation/pages/main_shell_page.dart';
+import '../../core/presentation/pages/splash_page.dart';
 
 final router = GoRouter(
-  initialLocation: '/',
+  initialLocation: '/splash',
   routes: [
+    GoRoute(
+      path: '/splash',
+      builder: (context, state) => const SplashPage(),
+    ),
     StatefulShellRoute.indexedStack(
       builder: (context, state, navigationShell) {
         return MainShellPage(navigationShell: navigationShell);
@@ -35,7 +41,7 @@ final router = GoRouter(
           routes: [
             GoRoute(
               path: '/billing',
-              builder: (context, state) => const originalHomePage(),
+              builder: (context, state) => const BillingPage(),
             ),
             GoRoute(
               path: '/checkout',
@@ -82,6 +88,13 @@ final router = GoRouter(
       builder: (context, state) {
         final customer = state.extra as Customer?;
         return AddCustomerPage(customer: customer);
+      },
+    ),
+    GoRoute(
+      path: '/customers/details',
+      builder: (context, state) {
+        final customer = state.extra as Customer;
+        return CustomerDetailsPage(customer: customer);
       },
     ),
     GoRoute(

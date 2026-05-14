@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:intl/intl.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../domain/entities/product.dart';
 import '../bloc/product_bloc.dart';
@@ -18,6 +19,7 @@ class _ProductListPageState extends State<ProductListPage> with SingleTickerProv
   final TextEditingController _searchController = TextEditingController();
   bool _isSearching = false;
   String _searchQuery = '';
+  String _sortBy = 'name'; // 'name', 'price_asc', 'price_desc', 'stock_asc', 'stock_desc'
 
   @override
   void initState() {
@@ -82,8 +84,8 @@ class _ProductListPageState extends State<ProductListPage> with SingleTickerProv
             },
           ),
           IconButton(
-            icon: const Icon(Icons.filter_list, color: Color(0xFF4B5563)),
-            onPressed: () {},
+            icon: const Icon(Icons.sort_rounded, color: Color(0xFF4B5563)),
+            onPressed: () => _showSortDialog(context),
           ),
           const SizedBox(width: 8),
         ],
@@ -155,155 +157,343 @@ class _ProductListPageState extends State<ProductListPage> with SingleTickerProv
         var filteredProducts = state.products.where((product) {
           final matchesSearch = product.name.toLowerCase().contains(_searchQuery) ||
               product.barcode.toLowerCase().contains(_searchQuery);
-          final matchesStock = !filterLowStock || product.stock < 20; // Example low stock threshold
+          final matchesStock = !filterLowStock || product.stock < 20;
           return matchesSearch && matchesStock;
         }).toList();
 
-        if (filteredProducts.isEmpty) {
-          return const Center(
-            child: Text('No products match your criteria.', style: TextStyle(color: Colors.grey)),
-          );
+        // Sort products
+        switch (_sortBy) {
+          case 'name':
+            filteredProducts.sort((a, b) => a.name.toLowerCase().compareTo(b.name.toLowerCase()));
+            break;
+          case 'price_asc':
+            filteredProducts.sort((a, b) => a.price.compareTo(b.price));
+            break;
+          case 'price_desc':
+            filteredProducts.sort((a, b) => b.price.compareTo(a.price));
+            break;
+          case 'stock_asc':
+            filteredProducts.sort((a, b) => a.stock.compareTo(b.stock));
+            break;
+          case 'stock_desc':
+            filteredProducts.sort((a, b) => b.stock.compareTo(a.stock));
+            break;
         }
 
-        return ListView.separated(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-          itemCount: filteredProducts.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 16),
-          itemBuilder: (context, index) {
-            final product = filteredProducts[index];
-            final isOutOfStock = product.stock <= 0;
+        final totalProducts = state.products.length;
+        final lowStockCount = state.products.where((p) => p.stock < 20).length;
+        final totalValue = state.products.fold(0.0, (sum, p) => sum + (p.price * p.stock));
 
-            return Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFF3F4F6)),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
+        return Column(
+          children: [
+            // Stats Summary
+            if (!filterLowStock && !_isSearching)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
+                child: SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      _buildStatCard('Total Products', '$totalProducts', Icons.inventory_2_rounded, const Color(0xFF4F46E5)),
+                      const SizedBox(width: 12),
+                      _buildStatCard('Low Stock', '$lowStockCount', Icons.warning_amber_rounded, const Color(0xFFF59E0B)),
+                      const SizedBox(width: 12),
+                      _buildStatCard('Total Value', '₹${totalValue.toStringAsFixed(0)}', Icons.account_balance_wallet_rounded, const Color(0xFF10B981)),
+                    ],
                   ),
-                ],
+                ),
               ),
-              child: Row(
-                children: [
-                  // Product Image
-                  Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFF9FAFB),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Center(
-                      child: Icon(
-                        Icons.local_mall_outlined,
-                        color: Colors.grey.shade400,
-                        size: 28,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-
-                  // Details
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Expanded(
-                              child: Text(
-                                product.name,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 15,
-                                  color: Color(0xFF1F2937),
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                            Text(
-                              '\$${product.price.toStringAsFixed(2)}',
-                              style: const TextStyle(
-                                fontWeight: FontWeight.w900,
-                                fontSize: 16,
-                                color: Color(0xFF1E3A8A),
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Barcode: ${product.barcode}',
-                          style: TextStyle(
-                            fontSize: 11,
-                            color: Colors.grey.shade500,
-                            fontWeight: FontWeight.w500,
+            
+            Expanded(
+              child: filteredProducts.isEmpty
+                  ? Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.search_off_rounded, size: 64, color: Colors.grey.shade300),
+                          const SizedBox(height: 16),
+                          Text(
+                            _isSearching ? 'No results for "$_searchQuery"' : 'No products found',
+                            style: TextStyle(color: Colors.grey.shade500, fontWeight: FontWeight.w500),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  isOutOfStock ? 'Out of stock' : 'In Stock: ${product.stock}',
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.bold,
-                                    color: isOutOfStock ? const Color(0xFFEF4444) : const Color(0xFF059669),
+                        ],
+                      ),
+                    )
+                  : ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                      itemCount: filteredProducts.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 16),
+                      itemBuilder: (context, index) {
+                        final product = filteredProducts[index];
+                        final isOutOfStock = product.stock <= 0;
+                        final isLowStock = !isOutOfStock && product.stock < 20;
+
+                        return Container(
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(16),
+                            border: Border.all(color: const Color(0xFFF3F4F6)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color(0xFF1E3A8A).withOpacity(0.04),
+                                blurRadius: 15,
+                                offset: const Offset(0, 8),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            children: [
+                              // Product Image Placeholder
+                              Container(
+                                width: 64,
+                                height: 64,
+                                decoration: BoxDecoration(
+                                  gradient: LinearGradient(
+                                    colors: [Colors.grey.shade50, Colors.grey.shade100],
+                                    begin: Alignment.topLeft,
+                                    end: Alignment.bottomRight,
+                                  ),
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Center(
+                                  child: Icon(
+                                    Icons.local_mall_outlined,
+                                    color: const Color(0xFF4F46E5).withOpacity(0.4),
+                                    size: 32,
                                   ),
                                 ),
-                                if (!isOutOfStock && product.stock < 5)
-                                  const Text(
-                                    'Low Stock Warning!',
-                                    style: TextStyle(
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0xFFF59E0B),
+                              ),
+                              const SizedBox(width: 16),
+
+                              // Details
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            product.name,
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 16,
+                                              color: Color(0xFF1F2937),
+                                            ),
+                                            maxLines: 1,
+                                            overflow: TextOverflow.ellipsis,
+                                          ),
+                                        ),
+                                        if (product.expiryDate != null) ...[
+                                          const SizedBox(width: 12),
+                                          Icon(Icons.event_note_rounded, size: 14, color: Colors.grey.shade400),
+                                          const SizedBox(width: 4),
+                                          Text(
+                                            'Exp: ${DateFormat('MMM yyyy').format(product.expiryDate!)}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade500,
+                                              fontWeight: FontWeight.w500,
+                                            ),
+                                          ),
+                                        ],
+                                        
+                                      ],
                                     ),
-                                  ),
-                              ],
-                            ),
-                            Row(
-                              children: [
-                                InkWell(
-                                  onTap: () => context.push('/products/edit/${product.id}', extra: product),
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4.0),
-                                    child: Icon(Icons.edit_outlined, color: Colors.grey, size: 18),
-                                  ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Text(
+                                          'SKU: ${product.barcode}',
+                                          style: TextStyle(
+                                            fontSize: 12,
+                                            color: Colors.grey.shade500,
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: isOutOfStock 
+                                                ? const Color(0xFFFEF2F2) 
+                                                : isLowStock 
+                                                    ? const Color(0xFFFFF7ED) 
+                                                    : const Color(0xFFECFDF5),
+                                            borderRadius: BorderRadius.circular(8),
+                                          ),
+                                          child: Text(
+                                            isOutOfStock 
+                                                ? 'Out of stock' 
+                                                : 'Stock: ${product.stock}',
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              fontWeight: FontWeight.w700,
+                                              color: isOutOfStock 
+                                                  ? const Color(0xFFEF4444) 
+                                                  : isLowStock 
+                                                      ? const Color(0xFFF59E0B) 
+                                                      : const Color(0xFF10B981),
+                                            ),
+                                          ),
+                                        ),
+                                        Text(
+                                          '₹${product.price.toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w800,
+                                            fontSize: 17,
+                                            color: Color(0xFF1E3A8A),
+                                          ),
+                                        ),
+                                        Row(
+                                          children: [
+                                            _buildActionButton(
+                                              icon: Icons.edit_outlined,
+                                              color: Colors.blue.shade700,
+                                              onTap: () => context.push('/products/edit/${product.id}', extra: product),
+                                            ),
+                                            const SizedBox(width: 8),
+                                            _buildActionButton(
+                                              icon: Icons.delete_outline_rounded,
+                                              color: Colors.red.shade700,
+                                              onTap: () => _confirmDelete(context, product),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 4),
-                                InkWell(
-                                  onTap: () => _confirmDelete(context, product),
-                                  borderRadius: BorderRadius.circular(8),
-                                  child: const Padding(
-                                    padding: EdgeInsets.all(4.0),
-                                    child: Icon(Icons.delete_outline, color: Colors.grey, size: 18),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ],
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                     ),
-                  ),
-                ],
-              ),
-            );
-          },
+            ),
+          ],
         );
       },
+    );
+  }
+
+  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: const Color(0xFFF3F4F6)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Icon(icon, color: color, size: 20),
+          ),
+          const SizedBox(width: 12),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: TextStyle(fontSize: 10, color: Colors.grey.shade500, fontWeight: FontWeight.bold),
+              ),
+              Text(
+                value,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({required IconData icon, required Color color, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(8),
+      child: Container(
+        padding: const EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(icon, color: color, size: 18),
+      ),
+    );
+  }
+
+  void _showSortDialog(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (context) {
+        return Container(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Sort Products By',
+                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF1F2937)),
+              ),
+              const SizedBox(height: 16),
+              _buildSortOption('Name (A-Z)', 'name', Icons.sort_by_alpha_rounded),
+              _buildSortOption('Price (Low to High)', 'price_asc', Icons.arrow_upward_rounded),
+              _buildSortOption('Price (High to Low)', 'price_desc', Icons.arrow_downward_rounded),
+              _buildSortOption('Stock (Low to High)', 'stock_asc', Icons.trending_down_rounded),
+              _buildSortOption('Stock (High to Low)', 'stock_desc', Icons.trending_up_rounded),
+              const SizedBox(height: 16),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildSortOption(String title, String value, IconData icon) {
+    final isSelected = _sortBy == value;
+    return InkWell(
+      onTap: () {
+        setState(() => _sortBy = value);
+        Navigator.pop(context);
+      },
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Row(
+          children: [
+            Icon(icon, color: isSelected ? const Color(0xFF4F46E5) : Colors.grey, size: 22),
+            const SizedBox(width: 16),
+            Text(
+              title,
+              style: TextStyle(
+                fontSize: 15,
+                fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                color: isSelected ? const Color(0xFF4F46E5) : const Color(0xFF4B5563),
+              ),
+            ),
+            const Spacer(),
+            if (isSelected) const Icon(Icons.check_circle, color: Color(0xFF4F46E5), size: 20),
+          ],
+        ),
+      ),
     );
   }
 

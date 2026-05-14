@@ -22,7 +22,7 @@ class CustomerModel extends Customer {
       id: map['id'],
       name: map['name'],
       phone: map['phone'],
-      points: map['points'] ?? 0,
+      points: (map['points'] ?? 0).toDouble(),
     );
   }
 

@@ -2,6 +2,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/usecases/customer_usecases.dart';
+import '../../../billing/domain/repositories/bill_repository.dart';
+import '../../../billing/domain/entities/bill.dart';
 
 // Events
 abstract class CustomerEvent extends Equatable {
@@ -40,6 +42,14 @@ class DeleteCustomerEvent extends CustomerEvent {
   List<Object?> get props => [id];
 }
 
+class LoadCustomerBillsEvent extends CustomerEvent {
+  final String customerId;
+  const LoadCustomerBillsEvent(this.customerId);
+  @override
+  List<Object?> get props => [customerId];
+}
+
+
 // States
 enum CustomerStatus { initial, loading, loaded, error }
 
@@ -47,12 +57,14 @@ class CustomerState extends Equatable {
   final CustomerStatus status;
   final List<Customer> customers;
   final List<Customer> filteredCustomers;
+  final List<Bill> bills;
   final String? error;
 
   const CustomerState({
     this.status = CustomerStatus.initial,
     this.customers = const [],
     this.filteredCustomers = const [],
+    this.bills = const [],
     this.error,
   });
 
@@ -60,18 +72,20 @@ class CustomerState extends Equatable {
     CustomerStatus? status,
     List<Customer>? customers,
     List<Customer>? filteredCustomers,
+    List<Bill>? bills,
     String? error,
   }) {
     return CustomerState(
       status: status ?? this.status,
       customers: customers ?? this.customers,
       filteredCustomers: filteredCustomers ?? this.filteredCustomers,
+      bills: bills ?? this.bills,
       error: error ?? this.error,
     );
   }
 
   @override
-  List<Object?> get props => [status, customers, filteredCustomers, error];
+  List<Object?> get props => [status, customers, filteredCustomers, bills, error];
 }
 
 // Bloc
@@ -80,18 +94,32 @@ class CustomerBloc extends Bloc<CustomerEvent, CustomerState> {
   final AddCustomerUseCase addCustomerUseCase;
   final UpdateCustomerUseCase updateCustomerUseCase;
   final DeleteCustomerUseCase deleteCustomerUseCase;
+  final BillRepository billRepository;
 
   CustomerBloc({
     required this.getCustomersUseCase,
     required this.addCustomerUseCase,
     required this.updateCustomerUseCase,
     required this.deleteCustomerUseCase,
+    required this.billRepository,
   }) : super(const CustomerState()) {
     on<LoadCustomersEvent>(_onLoadCustomers);
     on<SearchCustomersEvent>(_onSearchCustomers);
     on<AddCustomerEvent>(_onAddCustomer);
     on<UpdateCustomerEvent>(_onUpdateCustomer);
     on<DeleteCustomerEvent>(_onDeleteCustomer);
+    on<LoadCustomerBillsEvent>(_onLoadCustomerBills);
+  }
+
+  Future<void> _onLoadCustomerBills(
+      LoadCustomerBillsEvent event, Emitter<CustomerState> emit) async {
+    emit(state.copyWith(status: CustomerStatus.loading));
+    try {
+      final bills = await billRepository.getBillsByCustomerId(event.customerId);
+      emit(state.copyWith(status: CustomerStatus.loaded, bills: bills));
+    } catch (e) {
+      emit(state.copyWith(status: CustomerStatus.error, error: e.toString()));
+    }
   }
 
   Future<void> _onLoadCustomers(

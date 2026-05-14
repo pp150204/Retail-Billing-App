@@ -9,6 +9,7 @@ class Bill extends Equatable {
   final List<CartItem> items;
   final bool isPaid;
   final String? customerId;
+  final String paymentMethod;
 
   const Bill({
     required this.id,
@@ -18,11 +19,12 @@ class Bill extends Equatable {
     required this.items,
     this.isPaid = true,
     this.customerId,
+    this.paymentMethod = 'Cash',
   });
 
   @override
   List<Object?> get props =>
-      [id, billNumber, totalAmount, dateTime, items, isPaid, customerId];
+      [id, billNumber, totalAmount, dateTime, items, isPaid, customerId, paymentMethod];
 
   Bill copyWith({
     String? id,
@@ -32,6 +34,7 @@ class Bill extends Equatable {
     List<CartItem>? items,
     bool? isPaid,
     String? customerId,
+    String? paymentMethod,
   }) {
     return Bill(
       id: id ?? this.id,
@@ -41,6 +44,7 @@ class Bill extends Equatable {
       items: items ?? this.items,
       isPaid: isPaid ?? this.isPaid,
       customerId: customerId ?? this.customerId,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
     );
   }
 }

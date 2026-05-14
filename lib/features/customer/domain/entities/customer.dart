@@ -4,13 +4,13 @@ class Customer extends Equatable {
   final String id;
   final String name;
   final String phone;
-  final int points;
+  final double points;
 
   const Customer({
     required this.id,
     required this.name,
     required this.phone,
-    this.points = 0,
+    this.points = 0.0,
   });
 
   @override
@@ -20,7 +20,7 @@ class Customer extends Equatable {
     String? id,
     String? name,
     String? phone,
-    int? points,
+    double? points,
   }) {
     return Customer(
       id: id ?? this.id,

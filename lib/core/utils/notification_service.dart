@@ -30,7 +30,7 @@ class NotificationService {
         android: initializationSettingsAndroid, iOS: initializationSettingsIOS);
 
     await flutterLocalNotificationsPlugin.initialize(
-      settings: initializationSettings,
+      initializationSettings,
     );
   }
 
@@ -84,10 +84,10 @@ class NotificationService {
           NotificationDetails(android: androidPlatformChannelSpecifics);
 
       await flutterLocalNotificationsPlugin.show(
-          id: 0,
-          title: title,
-          body: body,
-          notificationDetails: platformChannelSpecifics,
+          0,
+          title,
+          body,
+          platformChannelSpecifics,
           payload: 'expiry_payload');
     }
   }

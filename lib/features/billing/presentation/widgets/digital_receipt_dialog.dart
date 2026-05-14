@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:pretty_qr_code/pretty_qr_code.dart';
 import '../bloc/billing_bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:screenshot/screenshot.dart';
@@ -16,6 +17,12 @@ class DigitalReceiptDialog extends StatelessWidget {
   final double total;
   final List<Map<String, dynamic>> items;
   final bool isPaid;
+  final String? customerName;
+  final String? customerPhone;
+  final String? upiId;
+
+  final bool isReadOnly;
+  final DateTime? billDate;
 
   const DigitalReceiptDialog({
     super.key,
@@ -27,12 +34,17 @@ class DigitalReceiptDialog extends StatelessWidget {
     required this.total,
     required this.items,
     this.isPaid = true,
+    this.customerName,
+    this.customerPhone,
+    this.upiId,
+    this.isReadOnly = false,
+    this.billDate,
   });
 
   @override
   Widget build(BuildContext context) {
     final screenshotController = ScreenshotController();
-    final now = DateTime.now();
+    final now = billDate ?? DateTime.now();
     final dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
     return Dialog(
@@ -58,6 +70,34 @@ class DigitalReceiptDialog extends StatelessWidget {
                   Text(address1, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   Text(address2, textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.grey)),
                   Text('PH: $phone', textAlign: TextAlign.center, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                  
+                  if (customerName != null) ...[
+                    const SizedBox(height: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[50],
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.grey[200]!),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(Icons.person_outline, size: 16, color: Colors.grey[600]),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(customerName!, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+                                Text(customerPhone ?? '', style: TextStyle(fontSize: 10, color: Colors.grey[600])),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+
                   const Divider(height: 32),
                   
                   // Receipt Info
@@ -139,36 +179,51 @@ class DigitalReceiptDialog extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 16),
+
+                  if (upiId != null && upiId!.isNotEmpty) ...[
+                    const Text('Scan to Pay', style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.grey)),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      width: 100,
+                      height: 100,
+                      child: PrettyQrView.data(
+                        data: 'upi://pay?pa=$upiId&pn=$shopName&am=${total.toStringAsFixed(2)}&cu=INR',
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                  ],
     
                   Text(footer, textAlign: TextAlign.center, style: const TextStyle(fontSize: 10, fontStyle: FontStyle.italic, color: Colors.grey)),
-                  const SizedBox(height: 24),
-    
-                  // Actions
-                  Row(
-                    children: [
-                      Expanded(
-                        child: ElevatedButton(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: const Color(0xFF1E3A8A),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  
+                  if (!isReadOnly) ...[
+                    const SizedBox(height: 24),
+                    // Actions
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ElevatedButton(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFF1E3A8A),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                            ),
+                            onPressed: () {
+                              context.read<BillingBloc>().add(CompleteTransactionEvent(isPaid: isPaid));
+                              Navigator.pop(context);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text('Transaction completed digitally!'),
+                                  backgroundColor: Colors.green,
+                                ),
+                              );
+                            },
+                            child: const Text('Confirm & Complete', style: TextStyle(fontWeight: FontWeight.bold)),
                           ),
-                          onPressed: () {
-                            context.read<BillingBloc>().add(CompleteTransactionEvent(isPaid: isPaid));
-                            Navigator.pop(context);
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Transaction completed digitally!'),
-                                backgroundColor: Colors.green,
-                              ),
-                            );
-                          },
-                          child: const Text('Confirm & Complete', style: TextStyle(fontWeight: FontWeight.bold)),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),

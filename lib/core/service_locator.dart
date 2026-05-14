@@ -54,6 +54,7 @@ Future<void> init() async {
       addCustomerUseCase: sl(),
       updateCustomerUseCase: sl(),
       deleteCustomerUseCase: sl(),
+      billRepository: sl(),
     ),
   );
 

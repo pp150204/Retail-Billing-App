@@ -62,9 +62,9 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
       
       await billRepository.saveBill(bill);
 
-      // Loyalty points logic: 1 point per 100 spent
+      // Loyalty points logic: 0.01 points per 1 rupee spent
       if (state.selectedCustomer != null) {
-        final earnedPoints = (state.totalAmount / 100).floor();
+        final earnedPoints = state.totalAmount * 0.01;
         if (earnedPoints > 0) {
           final updatedCustomer = state.selectedCustomer!.copyWith(
             points: state.selectedCustomer!.points + earnedPoints,
@@ -206,9 +206,9 @@ class BillingBloc extends Bloc<BillingEvent, BillingState> {
       
       await billRepository.saveBill(bill);
 
-      // Loyalty points logic: 1 point per 100 spent
+      // Loyalty points logic: 0.01 points per 1 rupee spent
       if (state.selectedCustomer != null) {
-        final earnedPoints = (state.totalAmount / 100).floor();
+        final earnedPoints = state.totalAmount * 0.01;
         if (earnedPoints > 0) {
           final updatedCustomer = state.selectedCustomer!.copyWith(
             points: state.selectedCustomer!.points + earnedPoints,

@@ -16,6 +16,8 @@ class ProductModel extends Product {
   @override
   final int stock;
   @override
+  final String category;
+  @override
   final DateTime? expiryDate;
 
   const ProductModel({
@@ -24,6 +26,7 @@ class ProductModel extends Product {
     required this.barcode,
     required this.price,
     required this.stock,
+    this.category = 'Uncategorized',
     this.expiryDate,
   }) : super(
           id: id,
@@ -31,6 +34,7 @@ class ProductModel extends Product {
           barcode: barcode,
           price: price,
           stock: stock,
+          category: category,
           expiryDate: expiryDate,
         );
 
@@ -41,6 +45,7 @@ class ProductModel extends Product {
       barcode: product.barcode,
       price: product.price,
       stock: product.stock,
+      category: product.category,
       expiryDate: product.expiryDate,
     );
   }
@@ -52,6 +57,7 @@ class ProductModel extends Product {
       barcode: barcode,
       price: price,
       stock: stock,
+      category: category,
       expiryDate: expiryDate,
     );
   }
@@ -70,6 +76,7 @@ class ProductModel extends Product {
       barcode: map['barcode'] as String,
       price: map['price'] as double,
       stock: map['stock'] as int,
+      category: map['category'] as String? ?? 'Uncategorized',
       expiryDate: map['expiryDate'] != null ? DateTime.parse(map['expiryDate'] as String) : null,
     );
   }
@@ -81,6 +88,7 @@ class ProductModel extends Product {
       'barcode': barcode,
       'price': price,
       'stock': stock,
+      'category': category,
       'expiryDate': expiryDate?.toIso8601String(),
     };
   }
